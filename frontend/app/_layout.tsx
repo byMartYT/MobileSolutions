@@ -11,6 +11,9 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/components/useColorScheme";
 import { api } from "@/api/api";
 import useStore from "@/store/store";
+import "@/global.css";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { View } from "react-native";
 
 export {
   // Catch any errors thrown by the Layout component.

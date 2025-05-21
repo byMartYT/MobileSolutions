@@ -1,4 +1,4 @@
-import { tab } from "@lucide/lab";
+import { LinearGradient } from "expo-linear-gradient";
 
 const tintColorLight = "#C0B0FF";
 const tintColorDark = "#4D3D90";
@@ -12,6 +12,11 @@ export default {
     tabIconDefault: "#ccc",
     tabIconSelected: tintColorLight,
     tabBackground: "#F5F5F5",
+    textGradient: {
+      colors: ["#C0B0FF", "#4D3D90"],
+      start: { x: 0, y: 0 },
+      end: { x: 1, y: 1 },
+    },
   },
   dark: {
     text: "#fff",
@@ -20,6 +25,11 @@ export default {
     tintDark: tintColorDark,
     tabIconDefault: "#ccc",
     tabIconSelected: tintColorLight,
-    tabBackground: "#000",
+    tabBackground: "#111",
+    textGradient: {
+      colors: ["#C0B0FF", "#4D3D90"],
+      start: { x: 0, y: 0 },
+      end: { x: 1, y: 1 },
+    },
   },
 };

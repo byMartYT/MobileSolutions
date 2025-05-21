@@ -12,12 +12,18 @@ const Container = ({
 }) => {
   if (!isHeaderShown) {
     return (
-      <SafeAreaView>
-        <View className="px-5 py-2.5">{children}</View>
+      <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
+        <View style={{ flex: 1 }} className="px-5">
+          {children}
+        </View>
       </SafeAreaView>
     );
   } else {
-    return <View className="px-5 py-2.5">{children}</View>;
+    return (
+      <View style={{ flex: 1 }} className="px-5 py-2.5">
+        {children}
+      </View>
+    );
   }
 };
 
