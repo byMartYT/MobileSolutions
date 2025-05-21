@@ -27,10 +27,10 @@ async def create_todo(todo: Todo, db: Database = Depends(get_database)):
     todo_dict = todo.dict(exclude={"id"})
     
     # Insert into database
-    result = await db.todos.insert_one(todo_dict)
+    result = await db.skills.insert_one(todo_dict)
     
     # Return created todo with ID
-    created_todo = await db.todos.find_one({"_id": result.inserted_id})
+    created_todo = await db.skills.find_one({"_id": result.inserted_id})
     return parse_todo(created_todo)
 
 
@@ -38,7 +38,7 @@ async def create_todo(todo: Todo, db: Database = Depends(get_database)):
 async def get_todos(skip: int = 0, limit: int = 10, db: Database = Depends(get_database)):
     """Get all todo lists with pagination"""
     todos = []
-    cursor = db.todos.find().skip(skip).limit(limit)
+    cursor = db.skills.find().skip(skip).limit(limit)
     
     async for todo in cursor:
         todos.append(parse_todo(todo))
@@ -50,7 +50,7 @@ async def get_todos(skip: int = 0, limit: int = 10, db: Database = Depends(get_d
 async def get_todo(todo_id: str, db: Database = Depends(get_database)):
     """Get a specific todo list by ID"""
     try:
-        todo = await db.todos.find_one({"_id": ObjectId(todo_id)})
+        todo = await db.skills.find_one({"_id": ObjectId(todo_id)})
         if todo:
             return parse_todo(todo)
         raise HTTPException(status_code=404, detail="Todo not found")
@@ -63,19 +63,19 @@ async def update_todo(todo_id: str, todo: Todo, db: Database = Depends(get_datab
     """Update a todo list by ID"""
     try:
         # Check if todo exists
-        existing = await db.todos.find_one({"_id": ObjectId(todo_id)})
+        existing = await db.skills.find_one({"_id": ObjectId(todo_id)})
         if not existing:
             raise HTTPException(status_code=404, detail="Todo not found")
             
         # Update the todo
         todo_dict = todo.dict(exclude={"id"})
-        await db.todos.update_one(
+        await db.skills.update_one(
             {"_id": ObjectId(todo_id)},
             {"$set": todo_dict}
         )
         
         # Return updated todo
-        updated_todo = await db.todos.find_one({"_id": ObjectId(todo_id)})
+        updated_todo = await db.skills.find_one({"_id": ObjectId(todo_id)})
         return parse_todo(updated_todo)
     except InvalidId:
         raise HTTPException(status_code=400, detail="Invalid todo ID format")
@@ -86,7 +86,7 @@ async def partial_update_todo(todo_id: str, todo_update: TodoPatch, db: Database
     """Partially update a todo list by ID - only update the fields that are provided"""
     try:
         # Check if todo exists
-        existing = await db.todos.find_one({"_id": ObjectId(todo_id)})
+        existing = await db.skills.find_one({"_id": ObjectId(todo_id)})
         if not existing:
             raise HTTPException(status_code=404, detail="Todo not found")
         
@@ -98,13 +98,13 @@ async def partial_update_todo(todo_id: str, todo_update: TodoPatch, db: Database
             return parse_todo(existing)
             
         # Update the todo with only the provided fields
-        await db.todos.update_one(
+        await db.skills.update_one(
             {"_id": ObjectId(todo_id)},
             {"$set": update_data}
         )
         
         # Return updated todo
-        updated_todo = await db.todos.find_one({"_id": ObjectId(todo_id)})
+        updated_todo = await db.skills.find_one({"_id": ObjectId(todo_id)})
         return parse_todo(updated_todo)
     except InvalidId:
         raise HTTPException(status_code=400, detail="Invalid todo ID format")
@@ -115,11 +115,11 @@ async def delete_todo(todo_id: str, db: Database = Depends(get_database)):
     """Delete a todo list by ID"""
     try:
         # Check if todo exists
-        todo = await db.todos.find_one({"_id": ObjectId(todo_id)})
+        todo = await db.skills.find_one({"_id": ObjectId(todo_id)})
         if not todo:
             raise HTTPException(status_code=404, detail="Todo not found")
             
         # Delete the todo
-        await db.todos.delete_one({"_id": ObjectId(todo_id)})
+        await db.skills.delete_one({"_id": ObjectId(todo_id)})
     except InvalidId:
         raise HTTPException(status_code=400, detail="Invalid todo ID format")

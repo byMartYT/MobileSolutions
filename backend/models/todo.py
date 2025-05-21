@@ -15,6 +15,7 @@ class Todo(BaseModel):
     Todo model representing a collection of todo items with associated metadata.
     """
     title: str = Field(..., description="Title of the todo collection")
+    user: str = Field(..., description="User ID associated with the todo")
     icon: str = Field(..., description="Icon identifier for the todo")
     color: str = Field(..., description="Color code for styling the todo")
     textColor: str = Field(..., description="Text color code for styling")
@@ -29,6 +30,7 @@ class Todo(BaseModel):
         schema_extra = {
             "example": {
                 "title": "Fitness Goals",
+                "user": "martin",
                 "icon": "dumbbell",
                 "color": "#4CAF50",
                 "textColor": "#FFFFFF",
@@ -54,6 +56,7 @@ class TodoPatch(BaseModel):
     All fields are optional to allow for partial updates.
     """
     title: Optional[str] = Field(None, description="Title of the todo collection")
+    user: Optional[str] = Field(None, description="User ID associated with the todo")
     icon: Optional[str] = Field(None, description="Icon identifier for the todo")
     color: Optional[str] = Field(None, description="Color code for styling the todo")
     textColor: Optional[str] = Field(None, description="Text color code for styling")
@@ -66,11 +69,15 @@ class TodoPatch(BaseModel):
 todo_schema = {
     "$jsonSchema": {
         "bsonType": "object",
-        "required": ["title", "icon", "color", "textColor", "tip", "goal", "todos"],
+        "required": ["title", "icon", "color", "textColor", "tip", "goal", "todos", "user"],
         "properties": {
             "title": {
                 "bsonType": "string",
                 "description": "Title must be a string and is required."
+            },
+            "user": {
+              "bsonType": "string",
+              "description": "User ID must be a string and is required.." 
             },
             "icon": {
                 "bsonType": "string",

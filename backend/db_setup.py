@@ -24,4 +24,4 @@ async def setup_database():
         print("Updated todos collection validation schema")
         
     # Create indexes if needed
-    await db.todos.create_index("title")
+    await db.skills.create_index("title")
