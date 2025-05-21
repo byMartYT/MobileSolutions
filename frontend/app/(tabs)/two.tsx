@@ -1,12 +1,13 @@
 import { Text, View } from "react-native";
 import React, { Component } from "react";
+import Container from "@/components/Container";
 
 export class two extends Component {
   render() {
     return (
-      <View>
+      <Container>
         <Text>two</Text>
-      </View>
+      </Container>
     );
   }
 }

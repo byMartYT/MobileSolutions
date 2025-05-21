@@ -1,5 +1,11 @@
 import React from "react";
-import { BrainCircuit, ListTodo, Sparkles, Plus } from "lucide-react-native";
+import {
+  BrainCircuit,
+  ListTodo,
+  Sparkles,
+  Plus,
+  Cog,
+} from "lucide-react-native";
 import { Tabs, useRouter } from "expo-router";
 import { View, StyleSheet } from "react-native";
 
@@ -44,6 +50,7 @@ export function TabBar() {
           name="two"
           options={{
             title: "Aufgaben",
+            headerShown: false,
             tabBarIcon: ({ color }) => (
               <TabBarIcon name={ListTodo} color={color} />
             ),
@@ -52,10 +59,18 @@ export function TabBar() {
         <Tabs.Screen
           name="ai"
           options={{
+            headerShown: false,
             title: "AI",
             tabBarIcon: ({ color }) => (
               <TabBarIcon name={Sparkles} color={color} />
             ),
+          }}
+        />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title: "Settings",
+            tabBarIcon: ({ color }) => <TabBarIcon name={Cog} color={color} />,
           }}
         />
       </Tabs>
