@@ -48,6 +48,20 @@ class Todo(BaseModel):
         }
 
 
+class TodoPatch(BaseModel):
+    """
+    Todo patch model for partial updates of todo items.
+    All fields are optional to allow for partial updates.
+    """
+    title: Optional[str] = Field(None, description="Title of the todo collection")
+    icon: Optional[str] = Field(None, description="Icon identifier for the todo")
+    color: Optional[str] = Field(None, description="Color code for styling the todo")
+    textColor: Optional[str] = Field(None, description="Text color code for styling")
+    tip: Optional[str] = Field(None, description="Helpful tip or description")
+    goal: Optional[str] = Field(None, description="Goal or objective of the todo collection")
+    todos: Optional[List[TodoItem]] = Field(None, description="List of todo items")
+
+
 # MongoDB Schema Validation
 todo_schema = {
     "$jsonSchema": {

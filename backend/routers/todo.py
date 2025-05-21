@@ -4,7 +4,7 @@ from pymongo.database import Database
 from bson import ObjectId
 from bson.errors import InvalidId
 from database import get_database
-from models.todo import Todo, TodoItem
+from models.todo import Todo, TodoItem, TodoPatch
 
 router = APIRouter(
     prefix="/todos",
@@ -72,6 +72,35 @@ async def update_todo(todo_id: str, todo: Todo, db: Database = Depends(get_datab
         await db.todos.update_one(
             {"_id": ObjectId(todo_id)},
             {"$set": todo_dict}
+        )
+        
+        # Return updated todo
+        updated_todo = await db.todos.find_one({"_id": ObjectId(todo_id)})
+        return parse_todo(updated_todo)
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid todo ID format")
+
+
+@router.patch("/{todo_id}", response_model=Todo)
+async def partial_update_todo(todo_id: str, todo_update: TodoPatch, db: Database = Depends(get_database)):
+    """Partially update a todo list by ID - only update the fields that are provided"""
+    try:
+        # Check if todo exists
+        existing = await db.todos.find_one({"_id": ObjectId(todo_id)})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Todo not found")
+        
+        # Convert update data to dict and remove None values
+        update_data = {k: v for k, v in todo_update.dict().items() if v is not None}
+        
+        if not update_data:
+            # If no fields to update, just return the existing todo
+            return parse_todo(existing)
+            
+        # Update the todo with only the provided fields
+        await db.todos.update_one(
+            {"_id": ObjectId(todo_id)},
+            {"$set": update_data}
         )
         
         # Return updated todo
