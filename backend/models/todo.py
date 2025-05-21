@@ -1,0 +1,101 @@
+from typing import List, Optional
+from pydantic import BaseModel, Field
+
+
+class TodoItem(BaseModel):
+    """
+    Todo item model representing individual tasks within a Todo list.
+    """
+    status: bool = Field(..., description="Status of the todo item (completed or not)")
+    text: str = Field(..., description="Content text of the todo item")
+
+
+class Todo(BaseModel):
+    """
+    Todo model representing a collection of todo items with associated metadata.
+    """
+    title: str = Field(..., description="Title of the todo collection")
+    icon: str = Field(..., description="Icon identifier for the todo")
+    color: str = Field(..., description="Color code for styling the todo")
+    textColor: str = Field(..., description="Text color code for styling")
+    tip: str = Field(..., description="Helpful tip or description")
+    goal: str = Field(..., description="Goal or objective of the todo collection")
+    todos: List[TodoItem] = Field(..., description="List of todo items")
+    
+    # Optional fields not in schema but useful for database
+    id: Optional[str] = Field(None, description="MongoDB object ID")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "title": "Fitness Goals",
+                "icon": "dumbbell",
+                "color": "#4CAF50",
+                "textColor": "#FFFFFF",
+                "tip": "Stay consistent with your workout routine",
+                "goal": "Exercise 3 times per week",
+                "todos": [
+                    {
+                        "status": False,
+                        "text": "30 minutes cardio"
+                    },
+                    {
+                        "status": True,
+                        "text": "Weight training"
+                    }
+                ]
+            }
+        }
+
+
+# MongoDB Schema Validation
+todo_schema = {
+    "$jsonSchema": {
+        "bsonType": "object",
+        "required": ["title", "icon", "color", "textColor", "tip", "goal", "todos"],
+        "properties": {
+            "title": {
+                "bsonType": "string",
+                "description": "Title must be a string and is required."
+            },
+            "icon": {
+                "bsonType": "string",
+                "description": "Icon must be a string and is required."
+            },
+            "color": {
+                "bsonType": "string",
+                "description": "Color must be a string and is required."
+            },
+            "textColor": {
+                "bsonType": "string",
+                "description": "Text color must be a string and is required."
+            },
+            "tip": {
+                "bsonType": "string",
+                "description": "Tip must be a string and is required."
+            },
+            "goal": {
+                "bsonType": "string",
+                "description": "Goal must be a string and is required."
+            },
+            "todos": {
+                "bsonType": "array",
+                "description": "Todos must be an array of objects.",
+                "items": {
+                    "bsonType": "object",
+                    "required": ["status", "text"],
+                    "properties": {
+                        "status": {
+                            "bsonType": "bool",
+                            "description": "Status must be a boolean."
+                        },
+                        "text": {
+                            "bsonType": "string",
+                            "description": "Text must be a string."
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,19 +1,31 @@
 from fastapi import FastAPI, Depends
 from fastapi.routing import APIRouter
+from fastapi.middleware.cors import CORSMiddleware
 from pymongo.database import Database
 from database import get_database
+from routers import todo
+from db_setup import setup_database
 
 app = FastAPI(title="MobileSolutions API")
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 api_router = APIRouter(prefix="/api/v1")
 
 @api_router.get("/")
 def read_root():
-    return {"message": "Hello, World!"}
+    return {"message": "Welcome to Skills API!"}
 
-@api_router.get("/items/{item_id}")
-def read_item(item_id: int, q: str = None):
-    return {"item_id": item_id, "q": q}
+@api_router.get("/health")
+def health_check():
+    return {"status": "healthy"}
 
 @api_router.get("/db-test")
 async def db_test(db: Database = Depends(get_database)):
@@ -27,4 +39,14 @@ async def db_test(db: Database = Depends(get_database)):
     except Exception as e:
         return {"error": f"Failed to connect to MongoDB: {str(e)}"}
 
+# Include the todo router
+api_router.include_router(todo.router)
+
+# Include the main API router
 app.include_router(api_router)
+
+# Event handlers
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database on startup"""
+    await setup_database()
