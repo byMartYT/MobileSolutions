@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **status** | **boolean** | Status of the todo item (completed or not) | [default to undefined]
 **text** | **string** | Content text of the todo item | [default to undefined]
+**id** | **string** | Id | [default to undefined]
 
 ## Example
 
@@ -17,6 +18,7 @@ import { TodoItem } from './api';
 const instance: TodoItem = {
     status,
     text,
+    id,
 };
 ```
 

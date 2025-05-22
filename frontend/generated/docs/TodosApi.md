@@ -10,6 +10,7 @@ All URIs are relative to *http://localhost*
 |[**getTodosApiV1TodosGet**](#gettodosapiv1todosget) | **GET** /api/v1/todos/ | Get Todos|
 |[**partialUpdateTodoApiV1TodosTodoIdPatch**](#partialupdatetodoapiv1todostodoidpatch) | **PATCH** /api/v1/todos/{todo_id} | Partial Update Todo|
 |[**updateTodoApiV1TodosTodoIdPut**](#updatetodoapiv1todostodoidput) | **PUT** /api/v1/todos/{todo_id} | Update Todo|
+|[**updateTodoItemApiV1TodosTodoIdItemsItemIdPatch**](#updatetodoitemapiv1todostodoiditemsitemidpatch) | **PATCH** /api/v1/todos/{todo_id}/items/{item_id} | Update Todo Item|
 
 # **createTodoApiV1TodosPost**
 > Todo createTodoApiV1TodosPost(todo)
@@ -316,6 +317,66 @@ const { status, data } = await apiInstance.updateTodoApiV1TodosTodoIdPut(
 |------------- | ------------- | ------------- | -------------|
 | **todo** | **Todo**|  | |
 | **todoId** | [**string**] |  | defaults to undefined|
+
+
+### Return type
+
+**Todo**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Successful Response |  -  |
+|**404** | Todo not found |  -  |
+|**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **updateTodoItemApiV1TodosTodoIdItemsItemIdPatch**
+> Todo updateTodoItemApiV1TodosTodoIdItemsItemIdPatch(todoItemPatch)
+
+Update a specific todo item within a todo list
+
+### Example
+
+```typescript
+import {
+    TodosApi,
+    Configuration,
+    TodoItemPatch
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new TodosApi(configuration);
+
+let todoId: string; // (default to undefined)
+let itemId: string; // (default to undefined)
+let todoItemPatch: TodoItemPatch; //
+
+const { status, data } = await apiInstance.updateTodoItemApiV1TodosTodoIdItemsItemIdPatch(
+    todoId,
+    itemId,
+    todoItemPatch
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **todoItemPatch** | **TodoItemPatch**|  | |
+| **todoId** | [**string**] |  | defaults to undefined|
+| **itemId** | [**string**] |  | defaults to undefined|
 
 
 ### Return type

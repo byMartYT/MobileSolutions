@@ -3,7 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "generate:apis": "npx openapi-generator-cli generate -i https://petstore.swagger.io/v2/swagger.json -g typescript-axios -o generated",
+    "generate:apis": "npx openapi-generator-cli generate -i http://localhost:8000/openapi.json -g typescript-axios -o generated",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
@@ -40,7 +40,8 @@
     "react-native-svg": "^15.11.2",
     "react-native-web": "~0.20.0",
     "tailwindcss": "^3.4.17",
-    "zustand": "^5.0.5"
+    "zustand": "^5.0.5",
+    "expo-checkbox": "~4.1.4"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

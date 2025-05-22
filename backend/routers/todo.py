@@ -4,7 +4,7 @@ from pymongo.database import Database
 from bson import ObjectId
 from bson.errors import InvalidId
 from database import get_database
-from models.todo import Todo, TodoItem, TodoPatch
+from models.todo import Todo, TodoItem, TodoPatch, TodoItemPatch
 
 router = APIRouter(
     prefix="/todos",
@@ -123,3 +123,50 @@ async def delete_todo(todo_id: str, db: Database = Depends(get_database)):
         await db.skills.delete_one({"_id": ObjectId(todo_id)})
     except InvalidId:
         raise HTTPException(status_code=400, detail="Invalid todo ID format")
+
+
+@router.patch("/{todo_id}/items/{item_id}", response_model=Todo)
+async def update_todo_item(
+    todo_id: str, 
+    item_id: str, 
+    item_update: TodoItemPatch, 
+    db: Database = Depends(get_database)
+):
+    """Update a specific todo item within a todo list"""
+    try:
+        # Überprüfen, ob die Todo-Liste existiert
+        todo = await db.skills.find_one({"_id": ObjectId(todo_id)})
+        if not todo:
+            raise HTTPException(status_code=404, detail="Todo list not found")
+        
+        # Konvertiere Update-Daten zu Dict und entferne None-Werte
+        update_data = {k: v for k, v in item_update.dict().items() if v is not None}
+        
+        if not update_data:
+            # Wenn keine Felder zum Aktualisieren vorhanden sind,
+            # geben wir die unveränderte Todo-Liste zurück
+            return parse_todo(todo)
+        
+        # Finde den Index des zu aktualisierenden Todo-Items
+        item_index = None
+        for i, item in enumerate(todo['todos']):
+            if item['id'] == item_id:
+                item_index = i
+                break
+        
+        if item_index is None:
+            raise HTTPException(status_code=404, detail="Todo item not found")
+            
+        # Aktualisiere die Felder des spezifischen Todo-Items
+        update_path = f"todos.{item_index}"
+        await db.skills.update_one(
+            {"_id": ObjectId(todo_id)},
+            {"$set": {f"{update_path}.{key}": value for key, value in update_data.items()}}
+        )
+        
+        # Gib die aktualisierte Todo-Liste zurück
+        updated_todo = await db.skills.find_one({"_id": ObjectId(todo_id)})
+        return parse_todo(updated_todo)
+        
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid ID format")

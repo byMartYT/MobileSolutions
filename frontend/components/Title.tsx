@@ -16,8 +16,8 @@ const Title = ({
   const last = title[title.length - 1];
   return (
     <View className={clsx("flex flex-row items-center", className)}>
-      <Text className="text-3xl font-semibold">{first} </Text>
-      <TextGradient className="text-3xl font-medium">{last}</TextGradient>
+      <Text className="text-4xl font-semibold">{first} </Text>
+      <TextGradient className="text-4xl font-medium">{last}</TextGradient>
     </View>
   );
 };

@@ -19,7 +19,7 @@ export default function Index() {
         }
         renderItem={({ item }) => <SkillItem {...item} />}
         keyExtractor={(item) => item.id!}
-        contentContainerStyle={{ gap: 40 }}
+        contentContainerStyle={{ gap: 40, paddingBottom: 20 }}
       />
     </Container>
   );

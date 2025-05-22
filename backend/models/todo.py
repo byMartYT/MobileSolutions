@@ -8,6 +8,8 @@ class TodoItem(BaseModel):
     """
     status: bool = Field(..., description="Status of the todo item (completed or not)")
     text: str = Field(..., description="Content text of the todo item")
+    id: str = Field(..., description="Id")
+
 
 
 class Todo(BaseModel):
@@ -64,6 +66,9 @@ class TodoPatch(BaseModel):
     goal: Optional[str] = Field(None, description="Goal or objective of the todo collection")
     todos: Optional[List[TodoItem]] = Field(None, description="List of todo items")
 
+class TodoItemPatch(BaseModel):
+    text: str = None
+    status: bool = None
 
 # MongoDB Schema Validation
 todo_schema = {

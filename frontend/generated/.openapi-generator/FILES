@@ -1,6 +1,5 @@
 .gitignore
 .npmignore
-.openapi-generator-ignore
 api.ts
 base.ts
 common.ts
@@ -9,6 +8,7 @@ docs/DefaultApi.md
 docs/HTTPValidationError.md
 docs/Todo.md
 docs/TodoItem.md
+docs/TodoItemPatch.md
 docs/TodoPatch.md
 docs/TodosApi.md
 docs/ValidationError.md
