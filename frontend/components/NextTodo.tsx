@@ -1,7 +1,8 @@
 import { View, Text, Pressable } from "react-native";
-import Checkbox from "expo-checkbox";
 import React, { useOptimistic, useState } from "react";
 import { TodoItem } from "@/generated";
+import { Check } from "lucide-react-native";
+import clsx from "clsx";
 
 type Props = {
   todo: TodoItem;
@@ -28,9 +29,31 @@ const NextTodo = ({ todo, onStatusChange }: Props) => {
   };
 
   return (
-    <Pressable className="bg-white/30 flex flex-row">
-      <Checkbox value={status} onValueChange={handlePress} />
-      <Text>{todo.text}</Text>
+    <Pressable
+      className="bg-white/30 flex flex-row items-center p-4 gap-3 rounded-xl"
+      style={{
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 7 },
+        shadowOpacity: 0.3,
+        shadowRadius: 14.7,
+        elevation: 8,
+      }}
+      onPress={handlePress}
+    >
+      <View
+        className={clsx(
+          "size-7 rounded-lg border-4 flex items-center justify-center",
+          status ? "bg-white border-white" : "bg-transparent border-white/80"
+        )}
+      >
+        {status && <Check color="black" size={16} strokeWidth={3} />}
+      </View>
+      <Text
+        className="text-white font-bold flex-shrink flex-wrap"
+        numberOfLines={0}
+      >
+        {todo.text}
+      </Text>
     </Pressable>
   );
 };

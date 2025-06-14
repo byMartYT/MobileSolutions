@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  BrainCircuit,
-  ListTodo,
-  Sparkles,
-  Plus,
-  Cog,
-} from "lucide-react-native";
+import { BrainCircuit, ListTodo, Sparkles, Cog } from "lucide-react-native";
 import { Tabs } from "expo-router";
 import { View } from "react-native";
 

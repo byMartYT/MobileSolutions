@@ -6,6 +6,7 @@ type SkillState = {
   setSkills: (skills: Todo[]) => void;
   addSkill: (skill: Todo) => void;
   updateSkill: (skill: Todo) => void;
+  removeSkill: (id: string) => void;
   user: string;
 };
 
@@ -20,6 +21,10 @@ const useStore = create<SkillState>((set) => ({
   updateSkill: (skill: Todo) =>
     set((state) => ({
       skills: state.skills.map((s) => (s.id === skill.id ? skill : s)),
+    })),
+  removeSkill: (id: string) =>
+    set((state) => ({
+      skills: state.skills.filter((skill) => skill.id !== id),
     })),
 }));
 
