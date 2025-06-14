@@ -1,7 +1,22 @@
-import React from "react";
-import { BrainCircuit, ListTodo, Sparkles, Cog } from "lucide-react-native";
-import { Tabs } from "expo-router";
-import { Button, View } from "react-native";
+import React, { useState } from "react";
+import {
+  BrainCircuit,
+  ListTodo,
+  Sparkles,
+  Cog,
+  Trophy,
+  X,
+} from "lucide-react-native";
+import { Tabs, router } from "expo-router";
+import {
+  Button,
+  View,
+  Modal,
+  Text,
+  Pressable,
+  Animated,
+  Dimensions,
+} from "react-native";
 
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
@@ -13,6 +28,42 @@ function TabBarIcon(props: { name: React.ElementType; color: string }) {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [slideAnim] = useState(
+    new Animated.Value(Dimensions.get("window").height)
+  );
+
+  const openModal = () => {
+    setModalVisible(true);
+    Animated.spring(slideAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 65,
+      friction: 11,
+    }).start();
+  };
+
+  const closeModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: Dimensions.get("window").height,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      setModalVisible(false);
+    });
+  };
+
+  const handleButton1Press = () => {
+    closeModal();
+    // Hier fügst du die Logik für Button 1 hinzu
+    console.log("Button 1 pressed");
+  };
+
+  const handleButton2Press = () => {
+    closeModal();
+    // Navigate to AI page
+    router.push("/(tabs)/ai");
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -54,7 +105,7 @@ export default function TabLayout() {
                 title="+"
                 color={Colors[colorScheme ?? "light"].tintDark}
                 accessibilityLabel="Add new task"
-                onPress={() => {}}
+                onPress={openModal}
               />
             ),
             tabBarIcon: ({ color }) => (
@@ -73,14 +124,85 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="settings"
+          name="erfolge"
           options={{
-            title: "Settings",
+            title: "Erfolge",
             sceneStyle: { flex: 1 },
-            tabBarIcon: ({ color }) => <TabBarIcon name={Cog} color={color} />,
+            tabBarIcon: ({ color }) => (
+              <TabBarIcon name={Trophy} color={color} />
+            ),
           }}
         />
       </Tabs>
+
+      {/* Bottom Slide Modal */}
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="none"
+        onRequestClose={closeModal}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "flex-end",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <Pressable style={{ flex: 1 }} onPress={closeModal} />
+          <Animated.View
+            style={{
+              transform: [{ translateY: slideAnim }],
+              backgroundColor: Colors[colorScheme ?? "light"].background,
+              paddingBottom: 48,
+            }}
+            className="rounded-t-3xl p-4"
+          >
+            {/* Header mit Close Button */}
+            <View
+              className="flex-row justify-between items-center"
+              style={{ marginBottom: 16 }}
+            >
+              <Text className="text-xl font-bold text-gray-900">
+                Neuen Skill erstellen
+              </Text>
+              <Pressable
+                onPress={closeModal}
+                className="p-2 rounded-full bg-gray-100"
+              >
+                <X size={20} color="#6B7280" />
+              </Pressable>
+            </View>
+
+            {/* Action Buttons */}
+            <View className="gap-4 flex-row">
+              <Pressable
+                onPress={handleButton1Press}
+                className="p-4 rounded-xl flex-1 flex items-center justify-center"
+                style={{
+                  backgroundColor: Colors[colorScheme ?? "light"].onSurface,
+                }}
+              >
+                <Text className="text-black text-center text-lg font-semibold">
+                  Manuell
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={handleButton2Press}
+                className="p-4 rounded-xl flex-1 flex items-center justify-center"
+                style={{
+                  backgroundColor: Colors[colorScheme ?? "light"].onSurface,
+                }}
+              >
+                <Text className="text-black text-center text-lg font-semibold">
+                  Mit KI
+                </Text>
+              </Pressable>
+            </View>
+          </Animated.View>
+        </View>
+      </Modal>
     </View>
   );
 }

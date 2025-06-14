@@ -12,6 +12,7 @@ export default {
     tabIconDefault: "#ccc",
     tabIconSelected: tintColorLight,
     tabBackground: "#F5F5F5",
+    onSurface: "#F0f0f0",
     textGradient: {
       colors: ["#C0B0FF", "#4D3D90"],
       start: { x: 0, y: 0 },
@@ -26,6 +27,7 @@ export default {
     tabIconDefault: "#ccc",
     tabIconSelected: tintColorLight,
     tabBackground: "#111",
+    onSurface: "#F0f0f0",
     textGradient: {
       colors: ["#C0B0FF", "#4D3D90"],
       start: { x: 0, y: 0 },

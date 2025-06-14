@@ -7,7 +7,7 @@ import clsx from "clsx";
 type Props = {
   todo: TodoItem;
   onWhite?: boolean;
-  onStatusChange: (newStatus: boolean) => Promise<void>;
+  onStatusChange: (newStatus: boolean, id: string) => Promise<void>;
 };
 
 const NextTodo = ({ todo, onStatusChange, onWhite = false }: Props) => {
@@ -21,7 +21,7 @@ const NextTodo = ({ todo, onStatusChange, onWhite = false }: Props) => {
 
     try {
       // Tatsächliches Update im Hintergrund
-      await onStatusChange(newStatus);
+      await onStatusChange(newStatus, todo.id);
     } catch (error) {
       // Bei Fehler zurücksetzen
       setStatus(!newStatus);

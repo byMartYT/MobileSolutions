@@ -28,7 +28,7 @@ const ListSkillItemHeader = (data: Props) => {
       >
         {text}
       </Text>
-      <IconBox {...rest} />
+      <IconBox {...rest} small={true} />
     </View>
   );
 };

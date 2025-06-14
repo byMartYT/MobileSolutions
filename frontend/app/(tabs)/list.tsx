@@ -8,6 +8,14 @@ import ListSkillItem from "@/components/ListSkillItem";
 const list = () => {
   const confettiRef = useRef(null);
   const { skills, setSkills } = useStore();
+
+  const handleConfetti = () => {
+    if (confettiRef.current) {
+      // @ts-ignore
+      confettiRef.current.restart();
+    }
+  };
+
   return (
     <Container isHeaderShown={true}>
       <Confetti
@@ -18,7 +26,9 @@ const list = () => {
       />
       <FlatList
         data={skills}
-        renderItem={({ item }) => <ListSkillItem {...item} />}
+        renderItem={({ item }) => (
+          <ListSkillItem handleConfetti={handleConfetti} {...item} />
+        )}
         keyExtractor={(item) => item.id!}
         contentContainerStyle={{ gap: 20, paddingBottom: 20 }}
       />

@@ -8,16 +8,18 @@ import { useAppTheme } from "@/hooks/useAppTheme";
 type IconBoxProps = {
   icon: string;
   color: string;
+  small?: boolean;
 };
 
-const IconBox = ({ icon, color }: IconBoxProps) => {
+const IconBox = ({ icon, color, small = false }: IconBoxProps) => {
   const { theme } = useAppTheme();
 
   const IconComponent = (LucideIcons as any)[icon];
   return (
     <View
       className={clsx(
-        "size-[62] flex items-center justify-center rounded-full"
+        "flex items-center justify-center rounded-full",
+        !small ? "size-[62]" : "size-[46]"
       )}
       style={{
         backgroundColor: `hsl(${extractHueFromHsl(color)}, 100%, 79%)`,
@@ -27,7 +29,7 @@ const IconBox = ({ icon, color }: IconBoxProps) => {
     >
       <IconComponent
         color={`hsl(${extractHueFromHsl(color)}, 88%, 26%)`}
-        size={28}
+        size={!small ? 28 : 22}
         strokeWidth={2}
       />
     </View>
