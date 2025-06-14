@@ -1,7 +1,7 @@
 import React from "react";
 import { BrainCircuit, ListTodo, Sparkles, Cog } from "lucide-react-native";
 import { Tabs } from "expo-router";
-import { View } from "react-native";
+import { Button, View } from "react-native";
 
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
@@ -45,10 +45,18 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="two"
+          name="list"
           options={{
             title: "Aufgaben",
-            headerShown: false,
+            headerShown: true,
+            headerRight: () => (
+              <Button
+                title="+"
+                color={Colors[colorScheme ?? "light"].tintDark}
+                accessibilityLabel="Add new task"
+                onPress={() => {}}
+              />
+            ),
             tabBarIcon: ({ color }) => (
               <TabBarIcon name={ListTodo} color={color} />
             ),

@@ -1,19 +1,19 @@
 import { View, Text, Pressable } from "react-native";
-import React from "react";
+import React, { Children } from "react";
 
 type Props = {
-  text: string;
+  children: string;
   onPress: () => void;
 } & React.ComponentProps<typeof Pressable>;
 
-export default function Button({ text, onPress, ...props }: Props) {
+export default function Button({ onPress, children, ...props }: Props) {
   return (
     <Pressable
       className="bg-white flex items-center justify-center px-4 py-3 rounded-full"
       onPress={onPress}
       {...props}
     >
-      <Text>{text}</Text>
+      <Text>{children}</Text>
     </Pressable>
   );
 }

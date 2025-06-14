@@ -60,7 +60,9 @@ const SkillItem = (data: SkillItemProps) => {
       </View>
       <View>
         <View className="flex-row items-center gap-2">
-          <BookCheck size={24} color="white" />
+          {count === total && (
+            <BookCheck size={24} color="white" style={{ marginTop: 4 }} />
+          )}
           <Text
             className="text-white -mb-1 text-3xl font-semibold"
             numberOfLines={1}
@@ -76,9 +78,13 @@ const SkillItem = (data: SkillItemProps) => {
       <ProgressBar count={count} total={total} />
       {/* Fix: Rende NextTodo nur, wenn nextTodo[0] existiert */}
       {nextTodo.length > 0 && count !== total ? (
-        <NextTodo todo={nextTodo[0]} onStatusChange={updateTodoStatus} />
+        <NextTodo
+          onWhite={false}
+          todo={nextTodo[0]}
+          onStatusChange={updateTodoStatus}
+        />
       ) : (
-        <Button text="Entfernen" onPress={() => data.removeSkill(data.id!)} />
+        <Button onPress={() => data.removeSkill(data.id!)}>Entfernen</Button>
       )}
     </Pressable>
   );

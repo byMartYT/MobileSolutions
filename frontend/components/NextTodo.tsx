@@ -6,10 +6,11 @@ import clsx from "clsx";
 
 type Props = {
   todo: TodoItem;
+  onWhite?: boolean;
   onStatusChange: (newStatus: boolean) => Promise<void>;
 };
 
-const NextTodo = ({ todo, onStatusChange }: Props) => {
+const NextTodo = ({ todo, onStatusChange, onWhite = false }: Props) => {
   const [status, setStatus] = useState(todo.status);
 
   const handlePress = async () => {
@@ -30,26 +31,44 @@ const NextTodo = ({ todo, onStatusChange }: Props) => {
 
   return (
     <Pressable
-      className="bg-white/30 flex flex-row items-center p-4 gap-3 rounded-xl"
-      style={{
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 7 },
-        shadowOpacity: 0.3,
-        shadowRadius: 14.7,
-        elevation: 8,
-      }}
+      className={clsx(
+        "flex flex-row items-center p-4 gap-3 rounded-xl",
+        !onWhite ? "bg-white/30" : "bg-white"
+      )}
+      style={
+        !onWhite && {
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 7 },
+          shadowOpacity: 0.3,
+          shadowRadius: 14.7,
+          elevation: 8,
+        }
+      }
       onPress={handlePress}
     >
       <View
         className={clsx(
-          "size-7 rounded-lg border-4 flex items-center justify-center",
-          status ? "bg-white border-white" : "bg-transparent border-white/80"
+          "rounded-lg flex items-center justify-center",
+          !onWhite ? "border-4 size-7" : "border-2 size-6",
+          !onWhite
+            ? status
+              ? "bg-white border-white"
+              : "bg-transparent border-white/80"
+            : status
+            ? "bg-black border-black"
+            : "bg-transparent border-black"
         )}
       >
-        {status && <Check color="black" size={16} strokeWidth={3} />}
+        {status && (
+          <Check
+            color={!onWhite ? "black" : "white"}
+            size={16}
+            strokeWidth={3}
+          />
+        )}
       </View>
       <Text
-        className="text-white font-bold flex-shrink flex-wrap"
+        className={clsx(" flex-1", !onWhite ? "text-white" : "text-black")}
         numberOfLines={0}
       >
         {todo.text}
