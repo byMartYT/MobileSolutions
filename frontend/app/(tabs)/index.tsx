@@ -36,11 +36,13 @@ export default function Index() {
       if (stats?.last_active_date) {
         const today = new Date();
         const lastActive = new Date(stats.last_active_date);
-        const diffTime = Math.abs(today.getTime() - lastActive.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        // Check if it's actually a different day (not just a different time)
+        const todayDateString = today.toDateString();
+        const lastActiveDateString = lastActive.toDateString();
 
-        // Award daily login bonus if it's a new day
-        if (diffDays >= 1) {
+        // Award daily login bonus only if it's actually a new day
+        if (todayDateString !== lastActiveDateString) {
           await awardPoints("daily_login");
         }
       } else {
@@ -49,8 +51,10 @@ export default function Index() {
       }
     };
 
-    checkDailyLogin();
-  }, [stats?.last_active_date]);
+    if (stats) {
+      checkDailyLogin();
+    }
+  }, [stats?.user_id]); // Changed dependency to user_id instead of last_active_date
 
   const handleConfetti = () => {
     if (confettiRef.current) {
