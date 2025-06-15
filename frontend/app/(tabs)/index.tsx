@@ -176,7 +176,7 @@ export default function Index() {
               <Title className="">Deine Lernziele</Title>
               <Pressable
                 onPress={openModal}
-                className="bg-blue-500 w-12 h-12 rounded-full items-center justify-center"
+                className="w-12 h-12 rounded-full items-center justify-center"
                 style={{
                   shadowColor: "#000",
                   shadowOffset: { width: 0, height: 2 },
