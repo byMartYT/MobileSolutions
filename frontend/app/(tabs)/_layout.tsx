@@ -54,24 +54,6 @@ export default function TabLayout() {
     });
   };
 
-  const handleButton1Press = () => {
-    console.log("Button 1 pressed - navigating to create-skill");
-    closeModal();
-    // Navigate to create skill screen
-    try {
-      router.push("/create-skill");
-      console.log("Navigation successful");
-    } catch (error) {
-      console.error("Navigation error:", error);
-    }
-  };
-
-  const handleButton2Press = () => {
-    closeModal();
-    // Navigate to AI page
-    router.push("/(tabs)/ai");
-  };
-
   return (
     <View style={{ flex: 1 }}>
       <Tabs

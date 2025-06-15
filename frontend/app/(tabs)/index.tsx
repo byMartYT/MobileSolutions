@@ -17,6 +17,7 @@ import { Confetti } from "react-native-fast-confetti";
 import { api } from "@/api/api";
 import { Plus, X } from "lucide-react-native";
 import { router } from "expo-router";
+import AddChooseModal from "@/components/AddChooseModal";
 
 export default function Index() {
   const { skills, removeSkill, setSkills } = useStore();
@@ -171,40 +172,6 @@ export default function Index() {
         }
         ListHeaderComponent={
           <View style={{ paddingTop: 20 }}>
-            {/* Debug Stats Display */}
-            <View
-              style={{
-                marginBottom: 20,
-                padding: 10,
-                backgroundColor: "#f0f0f0",
-                borderRadius: 8,
-              }}
-            >
-              <Text style={{ fontSize: 12, color: "#333" }}>
-                DEBUG: Points: {stats?.total_points || 0} | Todos:{" "}
-                {stats?.total_todos_completed || 0} | Skills:{" "}
-                {stats?.total_skills_completed || 0}
-              </Text>
-              <Pressable
-                onPress={async () => {
-                  console.log("🧪 TEST: Manual task completion test");
-                  await completeTask("todo", "test_todo_manual");
-                }}
-                style={{
-                  backgroundColor: "#007AFF",
-                  padding: 8,
-                  borderRadius: 4,
-                  marginTop: 5,
-                }}
-              >
-                <Text
-                  style={{ color: "white", textAlign: "center", fontSize: 12 }}
-                >
-                  TEST: Complete Todo
-                </Text>
-              </Pressable>
-            </View>
-
             <View className="flex-row items-center justify-between mb-4">
               <Title className="">Deine Lernziele</Title>
               <Pressable
@@ -233,6 +200,11 @@ export default function Index() {
         )}
         keyExtractor={(item) => item.id!}
         contentContainerStyle={{ gap: 40, paddingBottom: 20 }}
+      />
+      <AddChooseModal
+        closeModal={closeModal}
+        modalVisible={modalVisible}
+        slideAnim={slideAnim}
       />
     </Container>
   );

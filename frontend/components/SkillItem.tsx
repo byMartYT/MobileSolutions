@@ -9,6 +9,7 @@ import useStore from "@/store/store";
 import Button from "./Button";
 import { BookCheck } from "lucide-react-native";
 import { useGamification } from "@/store/gamificationStore";
+import { router } from "expo-router";
 
 type SkillItemProps = {
   handleConfetti: () => void;
@@ -73,6 +74,9 @@ const SkillItem = (data: SkillItemProps) => {
     <Pressable
       className="p-8 rounded-3xl gap-5 relative"
       style={{ backgroundColor: data.color }}
+      onPress={() => {
+        router.push(`/${data.id}`);
+      }}
     >
       <View className="absolute -top-8 right-6">
         <IconBox icon={data.icon} color={data.color} />
