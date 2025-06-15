@@ -3,6 +3,8 @@ import Title from "@/components/Title";
 import useStore from "@/store/store";
 import SkillItem from "@/components/SkillItem";
 import Container from "@/components/Container";
+import QuickStatsBar from "../../components/QuickStatsBar";
+import { useGamification } from "@/store/gamificationStore";
 import {
   FlatList,
   View,
@@ -18,6 +20,7 @@ import { router } from "expo-router";
 
 export default function Index() {
   const { skills, removeSkill, setSkills } = useStore();
+  const { awardPoints, stats } = useGamification();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -27,6 +30,28 @@ export default function Index() {
 
   const confettiRef = useRef(null);
   const completeConfettiRef = useRef(null);
+
+  // Check for daily login bonus
+  useEffect(() => {
+    const checkDailyLogin = async () => {
+      if (stats?.lastActiveDate) {
+        const today = new Date();
+        const lastActive = new Date(stats.lastActiveDate);
+        const diffTime = Math.abs(today.getTime() - lastActive.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // Award daily login bonus if it's a new day
+        if (diffDays >= 1) {
+          await awardPoints("daily_login");
+        }
+      } else {
+        // First time login
+        await awardPoints("daily_login");
+      }
+    };
+
+    checkDailyLogin();
+  }, [stats?.lastActiveDate]);
 
   const handleConfetti = () => {
     if (confettiRef.current) {

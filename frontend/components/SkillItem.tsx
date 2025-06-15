@@ -8,6 +8,7 @@ import { api } from "@/api/api";
 import useStore from "@/store/store";
 import Button from "./Button";
 import { BookCheck } from "lucide-react-native";
+import { useGamification } from "@/store/gamificationStore";
 
 type SkillItemProps = {
   handleConfetti: () => void;
@@ -18,6 +19,7 @@ type SkillItemProps = {
 
 const SkillItem = (data: SkillItemProps) => {
   const { updateSkill } = useStore();
+  const { awardPoints } = useGamification();
   const [nextTodo, setNextTodo] = useState<TodoItem[]>(
     data.todos.filter((todo) => !todo.status)
   );
@@ -44,10 +46,33 @@ const SkillItem = (data: SkillItemProps) => {
         todo.id === nextTodo[0].id ? updatedTodo : todo
       ),
     });
-    if (newStatus && count + 1 === total) {
-      data.completeConfetti();
+
+    // Gamification Integration
+    if (newStatus && data.id) {
+      // Award points for completing a todo
+      await awardPoints("todo_completed", nextTodo[0].id, {
+        skillId: data.id,
+        skillTitle: data.title,
+        todoText: nextTodo[0].text,
+      });
+
+      // Check if skill is completed and award bonus points
+      if (count + 1 === total) {
+        await awardPoints("skill_completed", data.id, {
+          skillTitle: data.title,
+          totalTodos: total,
+        });
+        data.completeConfetti();
+      } else {
+        data.handleConfetti();
+      }
     } else if (newStatus) {
-      data.handleConfetti();
+      // Fallback if no data.id - just show confetti
+      if (count + 1 === total) {
+        data.completeConfetti();
+      } else {
+        data.handleConfetti();
+      }
     }
   };
 

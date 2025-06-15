@@ -5,6 +5,7 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from database import get_database
 from models.todo import Todo, TodoItem, TodoPatch, TodoItemPatch
+from models.gamification import PointsReason, UserStatsUpdate
 
 router = APIRouter(
     prefix="/todos",
@@ -20,6 +21,52 @@ def parse_todo(todo):
     return todo
 
 
+async def award_points_for_todo_completion(db: Database, user_id: str, todo_id: str, points: int = 10):
+    """Award points when a todo item is completed."""
+    try:
+        # Import here to avoid circular imports
+        from routers.gamification import add_points
+        await add_points(user_id, points, PointsReason.TODO_COMPLETED, todo_id, db)
+    except Exception as e:
+        # Log error but don't fail the main operation
+        print(f"Error awarding points: {e}")
+
+
+async def award_points_for_skill_completion(db: Database, user_id: str, skill_id: str):
+    """Award points when a skill is completed (all todos done)."""
+    try:
+        # Import here to avoid circular imports
+        from routers.gamification import add_points, update_user_stats
+        
+        # Check if skill is actually completed
+        skill = await db.skills.find_one({"_id": ObjectId(skill_id)})
+        if skill:
+            completed_todos = sum(1 for todo in skill.get('todos', []) if todo.get('status'))
+            total_todos = len(skill.get('todos', []))
+            
+            if completed_todos == total_todos and total_todos > 0:
+                # Skill completed - award bonus points
+                bonus_points = 25 + (total_todos * 5)  # Base 25 + 5 per todo
+                await add_points(user_id, bonus_points, PointsReason.SKILL_COMPLETED, skill_id, db)
+                
+                # Update skill completion stats
+                update = UserStatsUpdate(skills_completed=1, update_streak=True)
+                await update_user_stats(user_id, update, db)
+    except Exception as e:
+        print(f"Error awarding skill completion points: {e}")
+
+
+async def update_user_activity(db: Database, user_id: str):
+    """Update user activity for streak tracking."""
+    try:
+        # Import here to avoid circular imports
+        from routers.gamification import update_user_stats
+        update = UserStatsUpdate(update_streak=True)
+        await update_user_stats(user_id, update, db)
+    except Exception as e:
+        print(f"Error updating user activity: {e}")
+
+
 @router.post("/", response_model=Todo, status_code=status.HTTP_201_CREATED)
 async def create_todo(todo: Todo, db: Database = Depends(get_database)):
     """Create a new todo list"""
@@ -28,6 +75,11 @@ async def create_todo(todo: Todo, db: Database = Depends(get_database)):
     
     # Insert into database
     result = await db.skills.insert_one(todo_dict)
+    
+    # Gamification: Update user activity for creating a skill
+    user_id = todo.user
+    if user_id:
+        await update_user_activity(db, user_id)
     
     # Return created todo with ID
     created_todo = await db.skills.find_one({"_id": result.inserted_id})
@@ -149,9 +201,11 @@ async def update_todo_item(
         
         # Finde den Index des zu aktualisierenden Todo-Items
         item_index = None
+        old_status = None
         for i, item in enumerate(todo['todos']):
             if item['id'] == item_id:
                 item_index = i
+                old_status = item.get('status', False)
                 break
         
         if item_index is None:
@@ -163,6 +217,25 @@ async def update_todo_item(
             {"_id": ObjectId(todo_id)},
             {"$set": {f"{update_path}.{key}": value for key, value in update_data.items()}}
         )
+        
+        # Gamification: Check if todo item was completed
+        new_status = update_data.get('status')
+        if new_status is not None and new_status != old_status:
+            user_id = todo.get('user')
+            if user_id and new_status:  # Todo was completed
+                # Award points for completing todo
+                await award_points_for_todo_completion(db, user_id, todo_id)
+                
+                # Update todo completion stats
+                from routers.gamification import update_user_stats
+                update_stats = UserStatsUpdate(todos_completed=1, update_streak=True)
+                await update_user_stats(user_id, update_stats, db)
+                
+                # Check if skill is now completed
+                await award_points_for_skill_completion(db, user_id, todo_id)
+            elif user_id:
+                # User was active, update streak
+                await update_user_activity(db, user_id)
         
         # Gib die aktualisierte Todo-Liste zurück
         updated_todo = await db.skills.find_one({"_id": ObjectId(todo_id)})
