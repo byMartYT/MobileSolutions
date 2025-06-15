@@ -5,6 +5,7 @@ All URIs are relative to *http://localhost*
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
 |[**addPointsApiV1GamificationPointsUserIdAddPost**](#addpointsapiv1gamificationpointsuseridaddpost) | **POST** /api/v1/gamification/points/{user_id}/add | Add Points|
+|[**dailyLoginApiV1GamificationDailyLoginUserIdPost**](#dailyloginapiv1gamificationdailyloginuseridpost) | **POST** /api/v1/gamification/daily-login/{user_id} | Daily Login|
 |[**getGamificationSummaryApiV1GamificationSummaryUserIdGet**](#getgamificationsummaryapiv1gamificationsummaryuseridget) | **GET** /api/v1/gamification/summary/{user_id} | Get Gamification Summary|
 |[**getLevelsApiV1GamificationLevelsGet**](#getlevelsapiv1gamificationlevelsget) | **GET** /api/v1/gamification/levels | Get Levels|
 |[**getUserAchievementsApiV1GamificationAchievementsUserIdGet**](#getuserachievementsapiv1gamificationachievementsuseridget) | **GET** /api/v1/gamification/achievements/{user_id} | Get User Achievements|
@@ -49,6 +50,58 @@ const { status, data } = await apiInstance.addPointsApiV1GamificationPointsUserI
 | **points** | [**number**] |  | defaults to undefined|
 | **reason** | **PointsReason** |  | defaults to undefined|
 | **referenceId** | [**string**] |  | (optional) defaults to undefined|
+
+
+### Return type
+
+**any**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Successful Response |  -  |
+|**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **dailyLoginApiV1GamificationDailyLoginUserIdPost**
+> any dailyLoginApiV1GamificationDailyLoginUserIdPost()
+
+Handle daily login - award points and update streak in one operation.
+
+### Example
+
+```typescript
+import {
+    GamificationApi,
+    Configuration
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new GamificationApi(configuration);
+
+let userId: string; // (default to undefined)
+
+const { status, data } = await apiInstance.dailyLoginApiV1GamificationDailyLoginUserIdPost(
+    userId
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **userId** | [**string**] |  | defaults to undefined|
 
 
 ### Return type

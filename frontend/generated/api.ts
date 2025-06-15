@@ -145,6 +145,165 @@ export type ConditionType = typeof ConditionType[keyof typeof ConditionType];
 
 
 /**
+ * 
+ * @export
+ * @interface ConversationContext
+ */
+export interface ConversationContext {
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationContext
+     */
+    'domain'?: string | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ConversationContext
+     */
+    'goals'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationContext
+     */
+    'difficulty'?: ConversationContextDifficultyEnum | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationContext
+     */
+    'timeframe'?: string | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof ConversationContext
+     */
+    'preferences'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof ConversationContext
+     */
+    'collected_info'?: { [key: string]: any; };
+}
+
+export const ConversationContextDifficultyEnum = {
+    Beginner: 'beginner',
+    Intermediate: 'intermediate',
+    Advanced: 'advanced'
+} as const;
+
+export type ConversationContextDifficultyEnum = typeof ConversationContextDifficultyEnum[keyof typeof ConversationContextDifficultyEnum];
+
+/**
+ * 
+ * @export
+ * @interface ConversationResponse
+ */
+export interface ConversationResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationResponse
+     */
+    'conversation_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationResponse
+     */
+    'message': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationResponse
+     */
+    'state': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ConversationResponse
+     */
+    'is_complete': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationResponse
+     */
+    'next_question'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ConversationResponse
+     */
+    'progress_percentage': number;
+}
+/**
+ * 
+ * @export
+ * @interface ConversationState
+ */
+export interface ConversationState {
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationState
+     */
+    'id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationState
+     */
+    'state': ConversationStateStateEnum;
+    /**
+     * 
+     * @type {ConversationContext}
+     * @memberof ConversationState
+     */
+    'context': ConversationContext;
+    /**
+     * 
+     * @type {Array<Message>}
+     * @memberof ConversationState
+     */
+    'messages': Array<Message>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ConversationState
+     */
+    'is_complete'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationState
+     */
+    'created_at': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationState
+     */
+    'updated_at': string;
+}
+
+export const ConversationStateStateEnum = {
+    Idle: 'idle',
+    CollectingDomain: 'collecting_domain',
+    CollectingGoals: 'collecting_goals',
+    CollectingDifficulty: 'collecting_difficulty',
+    CollectingTimeframe: 'collecting_timeframe',
+    CollectingPreferences: 'collecting_preferences',
+    Generating: 'generating',
+    Reviewing: 'reviewing',
+    Complete: 'complete'
+} as const;
+
+export type ConversationStateStateEnum = typeof ConversationStateStateEnum[keyof typeof ConversationStateStateEnum];
+
+/**
  * Summary of user\'s gamification status.
  * @export
  * @interface GamificationSummary
@@ -174,6 +333,61 @@ export interface GamificationSummary {
      * @memberof GamificationSummary
      */
     'recent_points': Array<PointsEntry>;
+}
+/**
+ * 
+ * @export
+ * @interface GeneratedSkill
+ */
+export interface GeneratedSkill {
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneratedSkill
+     */
+    'title': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneratedSkill
+     */
+    'goal': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneratedSkill
+     */
+    'color': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneratedSkill
+     */
+    'icon': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneratedSkill
+     */
+    'user'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneratedSkill
+     */
+    'textColor'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneratedSkill
+     */
+    'tip': string;
+    /**
+     * 
+     * @type {Array<{ [key: string]: any; }>}
+     * @memberof GeneratedSkill
+     */
+    'todos': Array<{ [key: string]: any; }>;
 }
 /**
  * 
@@ -230,6 +444,59 @@ export interface LevelConfig {
      * @memberof LevelConfig
      */
     'id'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface Message
+ */
+export interface Message {
+    /**
+     * 
+     * @type {string}
+     * @memberof Message
+     */
+    'role': MessageRoleEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof Message
+     */
+    'content': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Message
+     */
+    'timestamp': string;
+}
+
+export const MessageRoleEnum = {
+    User: 'user',
+    Assistant: 'assistant',
+    System: 'system'
+} as const;
+
+export type MessageRoleEnum = typeof MessageRoleEnum[keyof typeof MessageRoleEnum];
+
+/**
+ * 
+ * @export
+ * @interface MessageRequest
+ */
+export interface MessageRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof MessageRequest
+     */
+    'conversation_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MessageRequest
+     */
+    'message': string;
 }
 /**
  * Points transaction history model.
@@ -299,6 +566,44 @@ export const PointsReason = {
 export type PointsReason = typeof PointsReason[keyof typeof PointsReason];
 
 
+/**
+ * 
+ * @export
+ * @interface SkillGenerationRequest
+ */
+export interface SkillGenerationRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof SkillGenerationRequest
+     */
+    'conversation_id': string;
+}
+/**
+ * 
+ * @export
+ * @interface SkillGenerationResponse
+ */
+export interface SkillGenerationResponse {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SkillGenerationResponse
+     */
+    'success': boolean;
+    /**
+     * 
+     * @type {GeneratedSkill}
+     * @memberof SkillGenerationResponse
+     */
+    'skill'?: GeneratedSkill | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof SkillGenerationResponse
+     */
+    'error'?: string | null;
+}
 /**
  * Todo model representing a collection of todo items with associated metadata.
  * @export
@@ -652,6 +957,449 @@ export interface ValidationErrorLocInner {
 }
 
 /**
+ * AISkillGeneratorApi - axios parameter creator
+ * @export
+ */
+export const AISkillGeneratorApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Delete a conversation
+         * @summary Delete Conversation
+         * @param {string} conversationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteConversationApiV1AiConversationConversationIdDelete: async (conversationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'conversationId' is not null or undefined
+            assertParamExists('deleteConversationApiV1AiConversationConversationIdDelete', 'conversationId', conversationId)
+            const localVarPath = `/api/v1/ai/conversation/{conversation_id}`
+                .replace(`{${"conversation_id"}}`, encodeURIComponent(String(conversationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Generate the final skill based on conversation
+         * @summary Generate Skill
+         * @param {SkillGenerationRequest} skillGenerationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        generateSkillApiV1AiGenerateSkillPost: async (skillGenerationRequest: SkillGenerationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'skillGenerationRequest' is not null or undefined
+            assertParamExists('generateSkillApiV1AiGenerateSkillPost', 'skillGenerationRequest', skillGenerationRequest)
+            const localVarPath = `/api/v1/ai/generate-skill`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(skillGenerationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get conversation state
+         * @summary Get Conversation
+         * @param {string} conversationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getConversationApiV1AiConversationConversationIdGet: async (conversationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'conversationId' is not null or undefined
+            assertParamExists('getConversationApiV1AiConversationConversationIdGet', 'conversationId', conversationId)
+            const localVarPath = `/api/v1/ai/conversation/{conversation_id}`
+                .replace(`{${"conversation_id"}}`, encodeURIComponent(String(conversationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Health check endpoint
+         * @summary Health Check
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        healthCheckApiV1AiHealthGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/ai/health`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Send a message in the conversation
+         * @summary Send Message
+         * @param {MessageRequest} messageRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        sendMessageApiV1AiSendMessagePost: async (messageRequest: MessageRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'messageRequest' is not null or undefined
+            assertParamExists('sendMessageApiV1AiSendMessagePost', 'messageRequest', messageRequest)
+            const localVarPath = `/api/v1/ai/send-message`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(messageRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Start a new AI skill generation conversation
+         * @summary Start Conversation
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        startConversationApiV1AiStartConversationPost: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/ai/start-conversation`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * AISkillGeneratorApi - functional programming interface
+ * @export
+ */
+export const AISkillGeneratorApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = AISkillGeneratorApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Delete a conversation
+         * @summary Delete Conversation
+         * @param {string} conversationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteConversationApiV1AiConversationConversationIdDelete(conversationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteConversationApiV1AiConversationConversationIdDelete(conversationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AISkillGeneratorApi.deleteConversationApiV1AiConversationConversationIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Generate the final skill based on conversation
+         * @summary Generate Skill
+         * @param {SkillGenerationRequest} skillGenerationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async generateSkillApiV1AiGenerateSkillPost(skillGenerationRequest: SkillGenerationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SkillGenerationResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.generateSkillApiV1AiGenerateSkillPost(skillGenerationRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AISkillGeneratorApi.generateSkillApiV1AiGenerateSkillPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get conversation state
+         * @summary Get Conversation
+         * @param {string} conversationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getConversationApiV1AiConversationConversationIdGet(conversationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ConversationState>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getConversationApiV1AiConversationConversationIdGet(conversationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AISkillGeneratorApi.getConversationApiV1AiConversationConversationIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Health check endpoint
+         * @summary Health Check
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async healthCheckApiV1AiHealthGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.healthCheckApiV1AiHealthGet(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AISkillGeneratorApi.healthCheckApiV1AiHealthGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Send a message in the conversation
+         * @summary Send Message
+         * @param {MessageRequest} messageRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async sendMessageApiV1AiSendMessagePost(messageRequest: MessageRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ConversationResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.sendMessageApiV1AiSendMessagePost(messageRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AISkillGeneratorApi.sendMessageApiV1AiSendMessagePost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Start a new AI skill generation conversation
+         * @summary Start Conversation
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async startConversationApiV1AiStartConversationPost(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ConversationResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.startConversationApiV1AiStartConversationPost(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AISkillGeneratorApi.startConversationApiV1AiStartConversationPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * AISkillGeneratorApi - factory interface
+ * @export
+ */
+export const AISkillGeneratorApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = AISkillGeneratorApiFp(configuration)
+    return {
+        /**
+         * Delete a conversation
+         * @summary Delete Conversation
+         * @param {string} conversationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteConversationApiV1AiConversationConversationIdDelete(conversationId: string, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.deleteConversationApiV1AiConversationConversationIdDelete(conversationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Generate the final skill based on conversation
+         * @summary Generate Skill
+         * @param {SkillGenerationRequest} skillGenerationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        generateSkillApiV1AiGenerateSkillPost(skillGenerationRequest: SkillGenerationRequest, options?: RawAxiosRequestConfig): AxiosPromise<SkillGenerationResponse> {
+            return localVarFp.generateSkillApiV1AiGenerateSkillPost(skillGenerationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get conversation state
+         * @summary Get Conversation
+         * @param {string} conversationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getConversationApiV1AiConversationConversationIdGet(conversationId: string, options?: RawAxiosRequestConfig): AxiosPromise<ConversationState> {
+            return localVarFp.getConversationApiV1AiConversationConversationIdGet(conversationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Health check endpoint
+         * @summary Health Check
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        healthCheckApiV1AiHealthGet(options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.healthCheckApiV1AiHealthGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Send a message in the conversation
+         * @summary Send Message
+         * @param {MessageRequest} messageRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        sendMessageApiV1AiSendMessagePost(messageRequest: MessageRequest, options?: RawAxiosRequestConfig): AxiosPromise<ConversationResponse> {
+            return localVarFp.sendMessageApiV1AiSendMessagePost(messageRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Start a new AI skill generation conversation
+         * @summary Start Conversation
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        startConversationApiV1AiStartConversationPost(options?: RawAxiosRequestConfig): AxiosPromise<ConversationResponse> {
+            return localVarFp.startConversationApiV1AiStartConversationPost(options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * AISkillGeneratorApi - object-oriented interface
+ * @export
+ * @class AISkillGeneratorApi
+ * @extends {BaseAPI}
+ */
+export class AISkillGeneratorApi extends BaseAPI {
+    /**
+     * Delete a conversation
+     * @summary Delete Conversation
+     * @param {string} conversationId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AISkillGeneratorApi
+     */
+    public deleteConversationApiV1AiConversationConversationIdDelete(conversationId: string, options?: RawAxiosRequestConfig) {
+        return AISkillGeneratorApiFp(this.configuration).deleteConversationApiV1AiConversationConversationIdDelete(conversationId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Generate the final skill based on conversation
+     * @summary Generate Skill
+     * @param {SkillGenerationRequest} skillGenerationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AISkillGeneratorApi
+     */
+    public generateSkillApiV1AiGenerateSkillPost(skillGenerationRequest: SkillGenerationRequest, options?: RawAxiosRequestConfig) {
+        return AISkillGeneratorApiFp(this.configuration).generateSkillApiV1AiGenerateSkillPost(skillGenerationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get conversation state
+     * @summary Get Conversation
+     * @param {string} conversationId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AISkillGeneratorApi
+     */
+    public getConversationApiV1AiConversationConversationIdGet(conversationId: string, options?: RawAxiosRequestConfig) {
+        return AISkillGeneratorApiFp(this.configuration).getConversationApiV1AiConversationConversationIdGet(conversationId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Health check endpoint
+     * @summary Health Check
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AISkillGeneratorApi
+     */
+    public healthCheckApiV1AiHealthGet(options?: RawAxiosRequestConfig) {
+        return AISkillGeneratorApiFp(this.configuration).healthCheckApiV1AiHealthGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Send a message in the conversation
+     * @summary Send Message
+     * @param {MessageRequest} messageRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AISkillGeneratorApi
+     */
+    public sendMessageApiV1AiSendMessagePost(messageRequest: MessageRequest, options?: RawAxiosRequestConfig) {
+        return AISkillGeneratorApiFp(this.configuration).sendMessageApiV1AiSendMessagePost(messageRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Start a new AI skill generation conversation
+     * @summary Start Conversation
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AISkillGeneratorApi
+     */
+    public startConversationApiV1AiStartConversationPost(options?: RawAxiosRequestConfig) {
+        return AISkillGeneratorApiFp(this.configuration).startConversationApiV1AiStartConversationPost(options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * DefaultApi - axios parameter creator
  * @export
  */
@@ -936,6 +1684,40 @@ export const GamificationApiAxiosParamCreator = function (configuration?: Config
             };
         },
         /**
+         * Handle daily login - award points and update streak in one operation.
+         * @summary Daily Login
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dailyLoginApiV1GamificationDailyLoginUserIdPost: async (userId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('dailyLoginApiV1GamificationDailyLoginUserIdPost', 'userId', userId)
+            const localVarPath = `/api/v1/gamification/daily-login/{user_id}`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Get comprehensive gamification summary for user.
          * @summary Get Gamification Summary
          * @param {string} userId 
@@ -1172,6 +1954,19 @@ export const GamificationApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Handle daily login - award points and update streak in one operation.
+         * @summary Daily Login
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async dailyLoginApiV1GamificationDailyLoginUserIdPost(userId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.dailyLoginApiV1GamificationDailyLoginUserIdPost(userId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GamificationApi.dailyLoginApiV1GamificationDailyLoginUserIdPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Get comprehensive gamification summary for user.
          * @summary Get Gamification Summary
          * @param {string} userId 
@@ -1274,6 +2069,16 @@ export const GamificationApiFactory = function (configuration?: Configuration, b
             return localVarFp.addPointsApiV1GamificationPointsUserIdAddPost(userId, points, reason, referenceId, options).then((request) => request(axios, basePath));
         },
         /**
+         * Handle daily login - award points and update streak in one operation.
+         * @summary Daily Login
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dailyLoginApiV1GamificationDailyLoginUserIdPost(userId: string, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.dailyLoginApiV1GamificationDailyLoginUserIdPost(userId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Get comprehensive gamification summary for user.
          * @summary Get Gamification Summary
          * @param {string} userId 
@@ -1357,6 +2162,18 @@ export class GamificationApi extends BaseAPI {
      */
     public addPointsApiV1GamificationPointsUserIdAddPost(userId: string, points: number, reason: PointsReason, referenceId?: string | null, options?: RawAxiosRequestConfig) {
         return GamificationApiFp(this.configuration).addPointsApiV1GamificationPointsUserIdAddPost(userId, points, reason, referenceId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Handle daily login - award points and update streak in one operation.
+     * @summary Daily Login
+     * @param {string} userId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GamificationApi
+     */
+    public dailyLoginApiV1GamificationDailyLoginUserIdPost(userId: string, options?: RawAxiosRequestConfig) {
+        return GamificationApiFp(this.configuration).dailyLoginApiV1GamificationDailyLoginUserIdPost(userId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
