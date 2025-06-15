@@ -3,13 +3,27 @@ import Title from "@/components/Title";
 import useStore from "@/store/store";
 import SkillItem from "@/components/SkillItem";
 import Container from "@/components/Container";
-import { FlatList, View, RefreshControl } from "react-native";
+import {
+  FlatList,
+  View,
+  RefreshControl,
+  Pressable,
+  Animated,
+  Dimensions,
+} from "react-native";
 import { Confetti } from "react-native-fast-confetti";
 import { api } from "@/api/api";
+import { Plus, X } from "lucide-react-native";
+import { router } from "expo-router";
 
 export default function Index() {
   const { skills, removeSkill, setSkills } = useStore();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const [slideAnim] = useState(
+    new Animated.Value(Dimensions.get("window").height)
+  );
 
   const confettiRef = useRef(null);
   const completeConfettiRef = useRef(null);
@@ -44,6 +58,26 @@ export default function Index() {
     }
   };
 
+  const openModal = () => {
+    setModalVisible(true);
+    Animated.spring(slideAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 65,
+      friction: 11,
+    }).start();
+  };
+
+  const closeModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: Dimensions.get("window").height,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      setModalVisible(false);
+    });
+  };
+
   return (
     <Container>
       <Confetti
@@ -71,7 +105,22 @@ export default function Index() {
         }
         ListHeaderComponent={
           <View style={{ paddingTop: 20 }}>
-            <Title className="">Deine Lernziele</Title>
+            <View className="flex-row items-center justify-between mb-4">
+              <Title className="">Deine Lernziele</Title>
+              <Pressable
+                onPress={openModal}
+                className="bg-blue-500 w-12 h-12 rounded-full items-center justify-center"
+                style={{
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 3.84,
+                  elevation: 5,
+                }}
+              >
+                <Plus size={24} color="black" strokeWidth={2} />
+              </Pressable>
+            </View>
           </View>
         }
         renderItem={({ item }) => (
