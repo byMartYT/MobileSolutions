@@ -26,7 +26,12 @@ const PlaceholderAchievementCard: React.FC<PlaceholderAchievementCardProps> = ({
         id: `placeholder-${index}`,
         name: achievement.name,
         description: achievement.description,
-        isUnlocked: false,
+        icon: "trophy",
+        category: "general" as any,
+        condition_type: "todo_count" as any,
+        condition_value: 1,
+        points_reward: 10,
+        is_unlocked: false,
         progress: (index + 1) * 15,
       }}
       index={index}

@@ -95,8 +95,8 @@ const LevelProgressCard: React.FC<LevelProgressCardProps> = ({
             style={[
               {
                 transform: [{ scale: pulseAnimation }],
+                backgroundColor: "#FFFFFF60",
               },
-              styles.bgWhite20,
             ]}
             className="rounded-full p-3 mr-4"
           >
@@ -113,7 +113,7 @@ const LevelProgressCard: React.FC<LevelProgressCardProps> = ({
         </View>
         <View className="rounded-full px-3 py-1" style={styles.bgWhite10}>
           <Text className="text-xs font-semibold" style={styles.textWhite}>
-            {pointsToNextLevel} bis next
+            Noch {pointsToNextLevel} Punkte
           </Text>
         </View>
       </View>
@@ -155,7 +155,7 @@ const LevelProgressCard: React.FC<LevelProgressCardProps> = ({
         className="flex-row items-center rounded-xl p-3"
         style={styles.bgWhite10}
       >
-        <Star size={16} color="#fbbf24" />
+        <Star size={16} color="#ffffff80" />
         <Text className="text-sm ml-2 flex-1" style={styles.textWhite80}>
           Nächstes Level: Neue Achievements & Belohnungen
         </Text>

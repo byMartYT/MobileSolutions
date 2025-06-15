@@ -41,8 +41,14 @@ const ActivityItem: React.FC<ActivityItemProps> = ({
           {subtitle}
         </Text>
       </View>
-      <View className="px-3 py-1 rounded-full" style={styles.bgGreen50020}>
-        <Text className="font-medium" style={styles.textGreen400}>
+      <View
+        className="px-3 py-1 rounded-full"
+        style={{ backgroundColor: Colors[colorScheme].successContainer }}
+      >
+        <Text
+          className="font-medium"
+          style={{ color: Colors[colorScheme].successContainerText }}
+        >
           +{points}
         </Text>
       </View>

@@ -11,6 +11,8 @@ import PlaceholderAchievementCard from "../../components/PlaceholderAchievementC
 import RewardOverlay from "../../components/RewardOverlay";
 import { useGamification } from "../../store/gamificationStore";
 import { Target, Award, Flame } from "lucide-react-native";
+import Colors from "@/constants/Colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 const styles = StyleSheet.create({
   // Text colors
@@ -72,13 +74,15 @@ const erfolge = () => {
     await awardPoints("streak_bonus");
   };
 
+  const { colorScheme } = useAppTheme();
+
   return (
     <Container>
       <ScrollView showsVerticalScrollIndicator={true} className="flex-1">
         {/* Header */}
         <View className="mb-6">
           <Title className="mb-4">Deine Erfolge</Title>
-          <Text className="text-lg" style={styles.textBlack}>
+          <Text className="text-lg" style={{ color: Colors[colorScheme].text }}>
             Sammle Punkte, erreiche neue Level und schalte Achievements frei!
           </Text>
         </View>
@@ -97,8 +101,8 @@ const erfolge = () => {
         <View className="flex-row mb-6 gap-3">
           <StreakCard
             currentStreak={streakCount}
-            longestStreak={stats?.longestStreak || 0}
-            lastActiveDate={stats?.lastActiveDate || new Date().toISOString()}
+            longestStreak={stats?.longest_streak || 0}
+            lastActiveDate={stats?.last_active_date || new Date().toISOString()}
             onStreakBoost={handleStreakBoost}
             className="flex-1"
           />
@@ -106,14 +110,14 @@ const erfolge = () => {
             <StatsCard
               icon={<Target size={24} color="#3b82f6" />}
               title="Skills"
-              value={stats?.totalSkillsCompleted || 0}
-              subtitle="Abgeschlossen"
+              value={stats?.total_skills_completed || 0}
+              subtitle="Erlernt"
               color="bg-blue-600/20"
             />
             <StatsCard
               icon={<Award size={24} color="#10b981" />}
               title="Todos"
-              value={stats?.totalTodosCompleted || 0}
+              value={stats?.total_todos_completed || 0}
               subtitle="Erledigt"
               color="bg-green-600/20"
             />
@@ -122,7 +126,10 @@ const erfolge = () => {
 
         {/* Recent Activity */}
         <View className="mb-6">
-          <Text className="text-xl font-bold mb-4" style={styles.textBlack}>
+          <Text
+            className="text-xl font-bold mb-4"
+            style={{ color: Colors[colorScheme].text }}
+          >
             Letzte Aktivität
           </Text>
           <View className="gap-3">
@@ -150,7 +157,10 @@ const erfolge = () => {
         {/* Achievements */}
         <View className="mb-6">
           <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-xl font-bold" style={styles.textBlack}>
+            <Text
+              className="text-xl font-bold"
+              style={{ color: Colors[colorScheme].text }}
+            >
               Achievements
             </Text>
           </View>

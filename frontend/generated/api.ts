@@ -26,6 +26,158 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerM
 /**
  * 
  * @export
+ * @enum {string}
+ */
+
+export const AchievementCategory = {
+    Skill: 'skill',
+    Streak: 'streak',
+    General: 'general',
+    Speed: 'speed',
+    Consistency: 'consistency'
+} as const;
+
+export type AchievementCategory = typeof AchievementCategory[keyof typeof AchievementCategory];
+
+
+/**
+ * Achievement with user progress.
+ * @export
+ * @interface AchievementWithProgress
+ */
+export interface AchievementWithProgress {
+    /**
+     * Achievement name
+     * @type {string}
+     * @memberof AchievementWithProgress
+     */
+    'name': string;
+    /**
+     * Achievement description
+     * @type {string}
+     * @memberof AchievementWithProgress
+     */
+    'description': string;
+    /**
+     * Achievement icon identifier
+     * @type {string}
+     * @memberof AchievementWithProgress
+     */
+    'icon': string;
+    /**
+     * Achievement category
+     * @type {AchievementCategory}
+     * @memberof AchievementWithProgress
+     */
+    'category': AchievementCategory;
+    /**
+     * Type of condition to unlock
+     * @type {ConditionType}
+     * @memberof AchievementWithProgress
+     */
+    'condition_type': ConditionType;
+    /**
+     * Value needed to unlock
+     * @type {number}
+     * @memberof AchievementWithProgress
+     */
+    'condition_value': number;
+    /**
+     * Points awarded when unlocked
+     * @type {number}
+     * @memberof AchievementWithProgress
+     */
+    'points_reward': number;
+    /**
+     * Whether achievement is hidden until unlocked
+     * @type {boolean}
+     * @memberof AchievementWithProgress
+     */
+    'is_hidden'?: boolean;
+    /**
+     * Creation timestamp
+     * @type {string}
+     * @memberof AchievementWithProgress
+     */
+    'created_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AchievementWithProgress
+     */
+    'id'?: string | null;
+    /**
+     * Whether user has unlocked this achievement
+     * @type {boolean}
+     * @memberof AchievementWithProgress
+     */
+    'is_unlocked': boolean;
+    /**
+     * Progress towards unlocking (0-100%)
+     * @type {number}
+     * @memberof AchievementWithProgress
+     */
+    'progress': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof AchievementWithProgress
+     */
+    'unlocked_at'?: string | null;
+}
+
+
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const ConditionType = {
+    TodoCount: 'todo_count',
+    SkillCount: 'skill_count',
+    StreakDays: 'streak_days',
+    PointsTotal: 'points_total',
+    SpeedCompletion: 'speed_completion'
+} as const;
+
+export type ConditionType = typeof ConditionType[keyof typeof ConditionType];
+
+
+/**
+ * Summary of user\'s gamification status.
+ * @export
+ * @interface GamificationSummary
+ */
+export interface GamificationSummary {
+    /**
+     * 
+     * @type {UserStatsResponse}
+     * @memberof GamificationSummary
+     */
+    'stats': UserStatsResponse;
+    /**
+     * Recently unlocked achievements
+     * @type {Array<UserAchievement>}
+     * @memberof GamificationSummary
+     */
+    'recent_achievements': Array<UserAchievement>;
+    /**
+     * Achievements close to unlocking
+     * @type {Array<AchievementWithProgress>}
+     * @memberof GamificationSummary
+     */
+    'next_achievements': Array<AchievementWithProgress>;
+    /**
+     * Recent points activity
+     * @type {Array<PointsEntry>}
+     * @memberof GamificationSummary
+     */
+    'recent_points': Array<PointsEntry>;
+}
+/**
+ * 
+ * @export
  * @interface HTTPValidationError
  */
 export interface HTTPValidationError {
@@ -36,6 +188,117 @@ export interface HTTPValidationError {
      */
     'detail'?: Array<ValidationError>;
 }
+/**
+ * Level configuration model.
+ * @export
+ * @interface LevelConfig
+ */
+export interface LevelConfig {
+    /**
+     * Level number
+     * @type {number}
+     * @memberof LevelConfig
+     */
+    'level': number;
+    /**
+     * Total points required to reach this level
+     * @type {number}
+     * @memberof LevelConfig
+     */
+    'points_required': number;
+    /**
+     * Level title/name
+     * @type {string}
+     * @memberof LevelConfig
+     */
+    'title': string;
+    /**
+     * Rewards unlocked at this level
+     * @type {Array<string>}
+     * @memberof LevelConfig
+     */
+    'rewards'?: Array<string>;
+    /**
+     * Level color theme
+     * @type {string}
+     * @memberof LevelConfig
+     */
+    'color'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof LevelConfig
+     */
+    'id'?: string | null;
+}
+/**
+ * Points transaction history model.
+ * @export
+ * @interface PointsEntry
+ */
+export interface PointsEntry {
+    /**
+     * User ID
+     * @type {string}
+     * @memberof PointsEntry
+     */
+    'user_id': string;
+    /**
+     * Points awarded (positive) or deducted (negative)
+     * @type {number}
+     * @memberof PointsEntry
+     */
+    'points': number;
+    /**
+     * Reason for points change
+     * @type {PointsReason}
+     * @memberof PointsEntry
+     */
+    'reason': PointsReason;
+    /**
+     * 
+     * @type {string}
+     * @memberof PointsEntry
+     */
+    'reference_id'?: string | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof PointsEntry
+     */
+    'metadata'?: { [key: string]: any; } | null;
+    /**
+     * Creation timestamp
+     * @type {string}
+     * @memberof PointsEntry
+     */
+    'created_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PointsEntry
+     */
+    'id'?: string | null;
+}
+
+
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const PointsReason = {
+    TodoCompleted: 'todo_completed',
+    SkillCompleted: 'skill_completed',
+    StreakBonus: 'streak_bonus',
+    AchievementUnlocked: 'achievement_unlocked',
+    DailyLogin: 'daily_login'
+} as const;
+
+export type PointsReason = typeof PointsReason[keyof typeof PointsReason];
+
+
 /**
  * Todo model representing a collection of todo items with associated metadata.
  * @export
@@ -195,6 +458,165 @@ export interface TodoPatch {
      * @memberof TodoPatch
      */
     'todos'?: Array<TodoItem> | null;
+}
+/**
+ * User\'s unlocked achievement model.
+ * @export
+ * @interface UserAchievement
+ */
+export interface UserAchievement {
+    /**
+     * User ID
+     * @type {string}
+     * @memberof UserAchievement
+     */
+    'user_id': string;
+    /**
+     * Achievement ID
+     * @type {string}
+     * @memberof UserAchievement
+     */
+    'achievement_id': string;
+    /**
+     * Unlock timestamp
+     * @type {string}
+     * @memberof UserAchievement
+     */
+    'unlocked_at'?: string;
+    /**
+     * Whether user has seen the achievement notification
+     * @type {boolean}
+     * @memberof UserAchievement
+     */
+    'is_seen'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserAchievement
+     */
+    'id'?: string | null;
+}
+/**
+ * User stats with calculated fields.
+ * @export
+ * @interface UserStatsResponse
+ */
+export interface UserStatsResponse {
+    /**
+     * User ID
+     * @type {string}
+     * @memberof UserStatsResponse
+     */
+    'user_id': string;
+    /**
+     * Total accumulated points
+     * @type {number}
+     * @memberof UserStatsResponse
+     */
+    'total_points'?: number;
+    /**
+     * Current user level
+     * @type {number}
+     * @memberof UserStatsResponse
+     */
+    'current_level'?: number;
+    /**
+     * Progress to next level (0-100%)
+     * @type {number}
+     * @memberof UserStatsResponse
+     */
+    'current_level_progress'?: number;
+    /**
+     * Current consecutive days streak
+     * @type {number}
+     * @memberof UserStatsResponse
+     */
+    'streak_count'?: number;
+    /**
+     * Longest streak ever achieved
+     * @type {number}
+     * @memberof UserStatsResponse
+     */
+    'longest_streak'?: number;
+    /**
+     * Last activity date
+     * @type {string}
+     * @memberof UserStatsResponse
+     */
+    'last_active_date'?: string;
+    /**
+     * Total skills completed
+     * @type {number}
+     * @memberof UserStatsResponse
+     */
+    'total_skills_completed'?: number;
+    /**
+     * Total todos completed
+     * @type {number}
+     * @memberof UserStatsResponse
+     */
+    'total_todos_completed'?: number;
+    /**
+     * Creation timestamp
+     * @type {string}
+     * @memberof UserStatsResponse
+     */
+    'created_at'?: string;
+    /**
+     * Last update timestamp
+     * @type {string}
+     * @memberof UserStatsResponse
+     */
+    'updated_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserStatsResponse
+     */
+    'id'?: string | null;
+    /**
+     * Points needed for next level
+     * @type {number}
+     * @memberof UserStatsResponse
+     */
+    'points_to_next_level': number;
+    /**
+     * Next level title
+     * @type {string}
+     * @memberof UserStatsResponse
+     */
+    'next_level_title': string;
+}
+/**
+ * Model for updating user stats.
+ * @export
+ * @interface UserStatsUpdate
+ */
+export interface UserStatsUpdate {
+    /**
+     * 
+     * @type {number}
+     * @memberof UserStatsUpdate
+     */
+    'points_to_add'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UserStatsUpdate
+     */
+    'todos_completed'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UserStatsUpdate
+     */
+    'skills_completed'?: number | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UserStatsUpdate
+     */
+    'update_streak'?: boolean | null;
 }
 /**
  * 
@@ -449,6 +871,565 @@ export class DefaultApi extends BaseAPI {
      */
     public readRootApiV1Get(options?: RawAxiosRequestConfig) {
         return DefaultApiFp(this.configuration).readRootApiV1Get(options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * GamificationApi - axios parameter creator
+ * @export
+ */
+export const GamificationApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Add points to user and record in history.
+         * @summary Add Points
+         * @param {string} userId 
+         * @param {number} points 
+         * @param {PointsReason} reason 
+         * @param {string | null} [referenceId] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        addPointsApiV1GamificationPointsUserIdAddPost: async (userId: string, points: number, reason: PointsReason, referenceId?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('addPointsApiV1GamificationPointsUserIdAddPost', 'userId', userId)
+            // verify required parameter 'points' is not null or undefined
+            assertParamExists('addPointsApiV1GamificationPointsUserIdAddPost', 'points', points)
+            // verify required parameter 'reason' is not null or undefined
+            assertParamExists('addPointsApiV1GamificationPointsUserIdAddPost', 'reason', reason)
+            const localVarPath = `/api/v1/gamification/points/{user_id}/add`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (points !== undefined) {
+                localVarQueryParameter['points'] = points;
+            }
+
+            if (reason !== undefined) {
+                localVarQueryParameter['reason'] = reason;
+            }
+
+            if (referenceId !== undefined) {
+                localVarQueryParameter['reference_id'] = referenceId;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get comprehensive gamification summary for user.
+         * @summary Get Gamification Summary
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGamificationSummaryApiV1GamificationSummaryUserIdGet: async (userId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('getGamificationSummaryApiV1GamificationSummaryUserIdGet', 'userId', userId)
+            const localVarPath = `/api/v1/gamification/summary/{user_id}`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get all level configurations.
+         * @summary Get Levels
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getLevelsApiV1GamificationLevelsGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/gamification/levels`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get user\'s achievements with progress.
+         * @summary Get User Achievements
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserAchievementsApiV1GamificationAchievementsUserIdGet: async (userId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('getUserAchievementsApiV1GamificationAchievementsUserIdGet', 'userId', userId)
+            const localVarPath = `/api/v1/gamification/achievements/{user_id}`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get user\'s gamification statistics.
+         * @summary Get User Stats
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserStatsApiV1GamificationStatsUserIdGet: async (userId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('getUserStatsApiV1GamificationStatsUserIdGet', 'userId', userId)
+            const localVarPath = `/api/v1/gamification/stats/{user_id}`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Mark an achievement as seen by the user.
+         * @summary Mark Achievement Seen
+         * @param {string} userId 
+         * @param {string} achievementId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        markAchievementSeenApiV1GamificationAchievementsUserIdAchievementIdMarkSeenPost: async (userId: string, achievementId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('markAchievementSeenApiV1GamificationAchievementsUserIdAchievementIdMarkSeenPost', 'userId', userId)
+            // verify required parameter 'achievementId' is not null or undefined
+            assertParamExists('markAchievementSeenApiV1GamificationAchievementsUserIdAchievementIdMarkSeenPost', 'achievementId', achievementId)
+            const localVarPath = `/api/v1/gamification/achievements/{user_id}/{achievement_id}/mark-seen`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)))
+                .replace(`{${"achievement_id"}}`, encodeURIComponent(String(achievementId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Update user statistics.
+         * @summary Update User Stats
+         * @param {string} userId 
+         * @param {UserStatsUpdate} userStatsUpdate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateUserStatsApiV1GamificationStatsUserIdUpdatePost: async (userId: string, userStatsUpdate: UserStatsUpdate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('updateUserStatsApiV1GamificationStatsUserIdUpdatePost', 'userId', userId)
+            // verify required parameter 'userStatsUpdate' is not null or undefined
+            assertParamExists('updateUserStatsApiV1GamificationStatsUserIdUpdatePost', 'userStatsUpdate', userStatsUpdate)
+            const localVarPath = `/api/v1/gamification/stats/{user_id}/update`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(userStatsUpdate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * GamificationApi - functional programming interface
+ * @export
+ */
+export const GamificationApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = GamificationApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Add points to user and record in history.
+         * @summary Add Points
+         * @param {string} userId 
+         * @param {number} points 
+         * @param {PointsReason} reason 
+         * @param {string | null} [referenceId] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async addPointsApiV1GamificationPointsUserIdAddPost(userId: string, points: number, reason: PointsReason, referenceId?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.addPointsApiV1GamificationPointsUserIdAddPost(userId, points, reason, referenceId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GamificationApi.addPointsApiV1GamificationPointsUserIdAddPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get comprehensive gamification summary for user.
+         * @summary Get Gamification Summary
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getGamificationSummaryApiV1GamificationSummaryUserIdGet(userId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GamificationSummary>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGamificationSummaryApiV1GamificationSummaryUserIdGet(userId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GamificationApi.getGamificationSummaryApiV1GamificationSummaryUserIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get all level configurations.
+         * @summary Get Levels
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getLevelsApiV1GamificationLevelsGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<LevelConfig>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getLevelsApiV1GamificationLevelsGet(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GamificationApi.getLevelsApiV1GamificationLevelsGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get user\'s achievements with progress.
+         * @summary Get User Achievements
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getUserAchievementsApiV1GamificationAchievementsUserIdGet(userId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserAchievementsApiV1GamificationAchievementsUserIdGet(userId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GamificationApi.getUserAchievementsApiV1GamificationAchievementsUserIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get user\'s gamification statistics.
+         * @summary Get User Stats
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getUserStatsApiV1GamificationStatsUserIdGet(userId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserStatsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserStatsApiV1GamificationStatsUserIdGet(userId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GamificationApi.getUserStatsApiV1GamificationStatsUserIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Mark an achievement as seen by the user.
+         * @summary Mark Achievement Seen
+         * @param {string} userId 
+         * @param {string} achievementId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async markAchievementSeenApiV1GamificationAchievementsUserIdAchievementIdMarkSeenPost(userId: string, achievementId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.markAchievementSeenApiV1GamificationAchievementsUserIdAchievementIdMarkSeenPost(userId, achievementId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GamificationApi.markAchievementSeenApiV1GamificationAchievementsUserIdAchievementIdMarkSeenPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Update user statistics.
+         * @summary Update User Stats
+         * @param {string} userId 
+         * @param {UserStatsUpdate} userStatsUpdate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateUserStatsApiV1GamificationStatsUserIdUpdatePost(userId: string, userStatsUpdate: UserStatsUpdate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateUserStatsApiV1GamificationStatsUserIdUpdatePost(userId, userStatsUpdate, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GamificationApi.updateUserStatsApiV1GamificationStatsUserIdUpdatePost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * GamificationApi - factory interface
+ * @export
+ */
+export const GamificationApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = GamificationApiFp(configuration)
+    return {
+        /**
+         * Add points to user and record in history.
+         * @summary Add Points
+         * @param {string} userId 
+         * @param {number} points 
+         * @param {PointsReason} reason 
+         * @param {string | null} [referenceId] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        addPointsApiV1GamificationPointsUserIdAddPost(userId: string, points: number, reason: PointsReason, referenceId?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.addPointsApiV1GamificationPointsUserIdAddPost(userId, points, reason, referenceId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get comprehensive gamification summary for user.
+         * @summary Get Gamification Summary
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGamificationSummaryApiV1GamificationSummaryUserIdGet(userId: string, options?: RawAxiosRequestConfig): AxiosPromise<GamificationSummary> {
+            return localVarFp.getGamificationSummaryApiV1GamificationSummaryUserIdGet(userId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get all level configurations.
+         * @summary Get Levels
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getLevelsApiV1GamificationLevelsGet(options?: RawAxiosRequestConfig): AxiosPromise<Array<LevelConfig>> {
+            return localVarFp.getLevelsApiV1GamificationLevelsGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get user\'s achievements with progress.
+         * @summary Get User Achievements
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserAchievementsApiV1GamificationAchievementsUserIdGet(userId: string, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.getUserAchievementsApiV1GamificationAchievementsUserIdGet(userId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get user\'s gamification statistics.
+         * @summary Get User Stats
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserStatsApiV1GamificationStatsUserIdGet(userId: string, options?: RawAxiosRequestConfig): AxiosPromise<UserStatsResponse> {
+            return localVarFp.getUserStatsApiV1GamificationStatsUserIdGet(userId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Mark an achievement as seen by the user.
+         * @summary Mark Achievement Seen
+         * @param {string} userId 
+         * @param {string} achievementId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        markAchievementSeenApiV1GamificationAchievementsUserIdAchievementIdMarkSeenPost(userId: string, achievementId: string, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.markAchievementSeenApiV1GamificationAchievementsUserIdAchievementIdMarkSeenPost(userId, achievementId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Update user statistics.
+         * @summary Update User Stats
+         * @param {string} userId 
+         * @param {UserStatsUpdate} userStatsUpdate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateUserStatsApiV1GamificationStatsUserIdUpdatePost(userId: string, userStatsUpdate: UserStatsUpdate, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.updateUserStatsApiV1GamificationStatsUserIdUpdatePost(userId, userStatsUpdate, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * GamificationApi - object-oriented interface
+ * @export
+ * @class GamificationApi
+ * @extends {BaseAPI}
+ */
+export class GamificationApi extends BaseAPI {
+    /**
+     * Add points to user and record in history.
+     * @summary Add Points
+     * @param {string} userId 
+     * @param {number} points 
+     * @param {PointsReason} reason 
+     * @param {string | null} [referenceId] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GamificationApi
+     */
+    public addPointsApiV1GamificationPointsUserIdAddPost(userId: string, points: number, reason: PointsReason, referenceId?: string | null, options?: RawAxiosRequestConfig) {
+        return GamificationApiFp(this.configuration).addPointsApiV1GamificationPointsUserIdAddPost(userId, points, reason, referenceId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get comprehensive gamification summary for user.
+     * @summary Get Gamification Summary
+     * @param {string} userId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GamificationApi
+     */
+    public getGamificationSummaryApiV1GamificationSummaryUserIdGet(userId: string, options?: RawAxiosRequestConfig) {
+        return GamificationApiFp(this.configuration).getGamificationSummaryApiV1GamificationSummaryUserIdGet(userId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get all level configurations.
+     * @summary Get Levels
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GamificationApi
+     */
+    public getLevelsApiV1GamificationLevelsGet(options?: RawAxiosRequestConfig) {
+        return GamificationApiFp(this.configuration).getLevelsApiV1GamificationLevelsGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get user\'s achievements with progress.
+     * @summary Get User Achievements
+     * @param {string} userId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GamificationApi
+     */
+    public getUserAchievementsApiV1GamificationAchievementsUserIdGet(userId: string, options?: RawAxiosRequestConfig) {
+        return GamificationApiFp(this.configuration).getUserAchievementsApiV1GamificationAchievementsUserIdGet(userId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get user\'s gamification statistics.
+     * @summary Get User Stats
+     * @param {string} userId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GamificationApi
+     */
+    public getUserStatsApiV1GamificationStatsUserIdGet(userId: string, options?: RawAxiosRequestConfig) {
+        return GamificationApiFp(this.configuration).getUserStatsApiV1GamificationStatsUserIdGet(userId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Mark an achievement as seen by the user.
+     * @summary Mark Achievement Seen
+     * @param {string} userId 
+     * @param {string} achievementId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GamificationApi
+     */
+    public markAchievementSeenApiV1GamificationAchievementsUserIdAchievementIdMarkSeenPost(userId: string, achievementId: string, options?: RawAxiosRequestConfig) {
+        return GamificationApiFp(this.configuration).markAchievementSeenApiV1GamificationAchievementsUserIdAchievementIdMarkSeenPost(userId, achievementId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Update user statistics.
+     * @summary Update User Stats
+     * @param {string} userId 
+     * @param {UserStatsUpdate} userStatsUpdate 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GamificationApi
+     */
+    public updateUserStatsApiV1GamificationStatsUserIdUpdatePost(userId: string, userStatsUpdate: UserStatsUpdate, options?: RawAxiosRequestConfig) {
+        return GamificationApiFp(this.configuration).updateUserStatsApiV1GamificationStatsUserIdUpdatePost(userId, userStatsUpdate, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

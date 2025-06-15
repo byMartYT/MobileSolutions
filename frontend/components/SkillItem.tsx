@@ -50,18 +50,11 @@ const SkillItem = (data: SkillItemProps) => {
     // Gamification Integration
     if (newStatus && data.id) {
       // Award points for completing a todo
-      await awardPoints("todo_completed", nextTodo[0].id, {
-        skillId: data.id,
-        skillTitle: data.title,
-        todoText: nextTodo[0].text,
-      });
+      await awardPoints("todo_completed", 10, nextTodo[0].id);
 
       // Check if skill is completed and award bonus points
       if (count + 1 === total) {
-        await awardPoints("skill_completed", data.id, {
-          skillTitle: data.title,
-          totalTodos: total,
-        });
+        await awardPoints("skill_completed", 25, data.id);
         data.completeConfetti();
       } else {
         data.handleConfetti();

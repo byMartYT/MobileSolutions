@@ -33,9 +33,9 @@ export default function Index() {
   // Check for daily login bonus
   useEffect(() => {
     const checkDailyLogin = async () => {
-      if (stats?.lastActiveDate) {
+      if (stats?.last_active_date) {
         const today = new Date();
-        const lastActive = new Date(stats.lastActiveDate);
+        const lastActive = new Date(stats.last_active_date);
         const diffTime = Math.abs(today.getTime() - lastActive.getTime());
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -50,7 +50,7 @@ export default function Index() {
     };
 
     checkDailyLogin();
-  }, [stats?.lastActiveDate]);
+  }, [stats?.last_active_date]);
 
   const handleConfetti = () => {
     if (confettiRef.current) {

@@ -19,10 +19,12 @@ export default {
       start: { x: 0, y: 0 },
       end: { x: 1, y: 1 },
     },
+    successContainer: "rgba(16, 185, 129, 0.1)",
+    successContainerText: "#22B959",
   },
   dark: {
     text: "#fff",
-    background: "#000",
+    background: "#0f0f0f",
     tint: tintColorLight,
     tintDark: tintColorDark,
     tabIconDefault: "#ccc",
@@ -35,5 +37,7 @@ export default {
       start: { x: 0, y: 0 },
       end: { x: 1, y: 1 },
     },
+    successContainer: "rgba(16, 185, 129, 0.2)",
+    successContainerText: "#4ade80",
   },
 };

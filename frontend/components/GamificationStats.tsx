@@ -53,7 +53,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   );
 };
 
-interface StatsCardProps {
+interface GamificationStatsCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
@@ -63,7 +63,7 @@ interface StatsCardProps {
   progressValue?: number;
 }
 
-export const StatsCard: React.FC<StatsCardProps> = ({
+export const GamificationStatsCard: React.FC<GamificationStatsCardProps> = ({
   title,
   value,
   subtitle,
@@ -165,7 +165,7 @@ export const GamificationSummary: React.FC<GamificationSummaryProps> = ({
     {
       title: "Streak",
       value: `${streakCount} days`,
-      subtitle: `Best: ${stats.longestStreak} days`,
+      subtitle: `Best: ${stats.longest_streak ?? 0} days`,
       icon: "🔥",
       color: "#F44336",
       showProgress: false,
@@ -177,7 +177,7 @@ export const GamificationSummary: React.FC<GamificationSummaryProps> = ({
     ...basicStats,
     {
       title: "Skills",
-      value: stats.totalSkillsCompleted,
+      value: stats.total_skills_completed ?? 0,
       subtitle: "Completed",
       icon: "🎯",
       color: "#4CAF50",
@@ -186,7 +186,7 @@ export const GamificationSummary: React.FC<GamificationSummaryProps> = ({
     },
     {
       title: "Todos",
-      value: stats.totalTodosCompleted,
+      value: stats.total_todos_completed ?? 0,
       subtitle: "Completed",
       icon: "✅",
       color: "#2196F3",
@@ -209,7 +209,7 @@ export const GamificationSummary: React.FC<GamificationSummaryProps> = ({
       </Text>
       <View style={styles.statsGrid}>
         {statsToShow.map((stat, index) => (
-          <StatsCard
+          <GamificationStatsCard
             key={index}
             title={stat.title}
             value={stat.value}

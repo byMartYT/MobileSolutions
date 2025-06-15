@@ -1,5 +1,15 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import {
+  GamificationApi,
+  UserStatsResponse,
+  AchievementWithProgress,
+  GamificationSummary,
+  PointsEntry,
+  LevelConfig,
+  PointsReason,
+} from "@/generated/api";
+import { Configuration } from "@/generated/configuration";
 
 // Try to import AsyncStorage, fallback to a simple in-memory storage
 let AsyncStorage: any;
@@ -26,92 +36,22 @@ try {
   };
 }
 
-// Types
-export interface UserStats {
-  id: string;
-  userId: string;
-  totalPoints: number;
-  currentLevel: number;
-  currentLevelProgress: number;
-  streakCount: number;
-  longestStreak: number;
-  lastActiveDate: string;
-  totalSkillsCompleted: number;
-  totalTodosCompleted: number;
-  createdAt: string;
-  updatedAt: string;
-  pointsToNextLevel: number;
-  nextLevelTitle: string;
-}
+// API Configuration
+const apiConfig = new Configuration({
+  basePath: process.env.EXPO_PUBLIC_API_URL || "http://192.168.178.118:8000",
+});
 
-export interface Achievement {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  category: "skill" | "streak" | "general" | "speed" | "consistency";
-  conditionType:
-    | "todo_count"
-    | "skill_count"
-    | "streak_days"
-    | "points_total"
-    | "speed_completion";
-  conditionValue: number;
-  pointsReward: number;
-  isHidden: boolean;
-  createdAt: string;
-}
+const gamificationApi = new GamificationApi(apiConfig);
 
-export interface UserAchievement {
-  id: string;
-  userId: string;
-  achievementId: string;
-  unlockedAt: string;
-  isSeen: boolean;
-}
+// Default user ID (in a real app, this would come from authentication)
+const DEFAULT_USER_ID = "user_123";
 
-export interface AchievementWithProgress extends Achievement {
-  isUnlocked: boolean;
-  progress: number;
-  unlockedAt?: string;
-}
-
-export interface PointsEntry {
-  id: string;
-  userId: string;
-  points: number;
-  reason:
-    | "todo_completed"
-    | "skill_completed"
-    | "streak_bonus"
-    | "achievement_unlocked"
-    | "daily_login";
-  referenceId?: string;
-  metadata?: Record<string, any>;
-  createdAt: string;
-}
-
-export interface LevelConfig {
-  id: string;
-  level: number;
-  pointsRequired: number;
-  title: string;
-  rewards: string[];
-  color: string;
-}
-
-export interface GamificationSummary {
-  stats: UserStats;
-  recentAchievements: UserAchievement[];
-  nextAchievements: AchievementWithProgress[];
-  recentPoints: PointsEntry[];
-}
-
+// Additional types that extend the generated ones
 export interface PendingReward {
   id: string;
   type: "points" | "achievement" | "level_up";
   points?: number;
-  achievement?: Achievement;
+  achievement?: AchievementWithProgress;
   newLevel?: LevelConfig;
   timestamp: string;
 }
@@ -119,7 +59,7 @@ export interface PendingReward {
 // Store State
 interface GamificationState {
   // Data
-  stats: UserStats | null;
+  stats: UserStatsResponse | null;
   achievements: AchievementWithProgress[];
   levels: LevelConfig[];
   recentPoints: PointsEntry[];
@@ -129,122 +69,24 @@ interface GamificationState {
   isLoading: boolean;
   lastSyncTime: string | null;
 
-  // Current user
-  currentUserId: string;
-
-  // Actions
-  setCurrentUser: (userId: string) => void;
-  fetchGamificationData: () => Promise<void>;
-  syncStats: () => Promise<void>;
+  // Methods
+  fetchData: () => Promise<void>;
+  fetchStats: (userId?: string) => Promise<UserStatsResponse>;
+  fetchSummary: (userId?: string) => Promise<GamificationSummary>;
+  fetchAchievements: (userId?: string) => Promise<AchievementWithProgress[]>;
+  fetchLevels: () => Promise<LevelConfig[]>;
   awardPoints: (
     reason: string,
-    referenceId?: string,
-    metadata?: Record<string, any>
+    points?: number,
+    referenceId?: string
   ) => Promise<void>;
-  markAchievementSeen: (achievementId: string) => Promise<void>;
-  showPendingRewards: () => PendingReward[];
   dismissReward: (rewardId: string) => void;
   clearAllRewards: () => void;
 
-  // Internal
-  _updateStats: (newStats: Partial<UserStats>) => void;
+  // Internal methods
+  _updateStats: (newStats: Partial<UserStatsResponse>) => void;
   _addPendingReward: (reward: PendingReward) => void;
 }
-
-// API functions
-const API_BASE = "http://localhost:8000/api/v1";
-import mockGamificationApi from "./mockGamificationApi";
-
-const api = {
-  async fetchStats(userId: string): Promise<UserStats> {
-    try {
-      const response = await fetch(`${API_BASE}/gamification/stats/${userId}`);
-      if (!response.ok) throw new Error("Failed to fetch stats");
-      return response.json();
-    } catch (error) {
-      console.log("Using mock data for stats");
-      return mockGamificationApi.fetchStats(userId);
-    }
-  },
-
-  async fetchSummary(userId: string): Promise<GamificationSummary> {
-    try {
-      const response = await fetch(
-        `${API_BASE}/gamification/summary/${userId}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch summary");
-      return response.json();
-    } catch (error) {
-      console.log("Using mock data for summary");
-      return mockGamificationApi.fetchSummary(userId);
-    }
-  },
-
-  async fetchAchievements(userId: string): Promise<AchievementWithProgress[]> {
-    try {
-      const response = await fetch(
-        `${API_BASE}/gamification/achievements/${userId}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch achievements");
-      return response.json();
-    } catch (error) {
-      console.log("Using mock data for achievements");
-      return mockGamificationApi.fetchAchievements(userId);
-    }
-  },
-
-  async fetchLevels(): Promise<LevelConfig[]> {
-    try {
-      const response = await fetch(`${API_BASE}/gamification/levels`);
-      if (!response.ok) throw new Error("Failed to fetch levels");
-      return response.json();
-    } catch (error) {
-      console.log("Using mock data for levels");
-      return mockGamificationApi.fetchLevels();
-    }
-  },
-
-  async addPoints(
-    userId: string,
-    points: number,
-    reason: string,
-    referenceId?: string
-  ): Promise<any> {
-    try {
-      const response = await fetch(
-        `${API_BASE}/gamification/points/${userId}/add`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ points, reason, reference_id: referenceId }),
-        }
-      );
-      if (!response.ok) throw new Error("Failed to add points");
-      return response.json();
-    } catch (error) {
-      console.log("Using mock data for add points");
-      return mockGamificationApi.addPoints(userId, points, reason, referenceId);
-    }
-  },
-
-  async markAchievementSeen(
-    userId: string,
-    achievementId: string
-  ): Promise<void> {
-    try {
-      const response = await fetch(
-        `${API_BASE}/gamification/achievements/${userId}/${achievementId}/mark-seen`,
-        {
-          method: "POST",
-        }
-      );
-      if (!response.ok) throw new Error("Failed to mark achievement as seen");
-    } catch (error) {
-      console.log("Using mock data for mark achievement seen");
-      return mockGamificationApi.markAchievementSeen(userId, achievementId);
-    }
-  },
-};
 
 // Create store
 export const useGamificationStore = create<GamificationState>()(
@@ -258,155 +100,133 @@ export const useGamificationStore = create<GamificationState>()(
       pendingRewards: [],
       isLoading: false,
       lastSyncTime: null,
-      currentUserId: "martin", // Default user
 
-      // Actions
-      setCurrentUser: (userId: string) => {
-        set({ currentUserId: userId });
-        get().fetchGamificationData();
-      },
-
-      fetchGamificationData: async () => {
-        const { currentUserId } = get();
-        if (!currentUserId) return;
-
+      // Methods
+      fetchData: async () => {
+        const userId = DEFAULT_USER_ID;
         set({ isLoading: true });
-        try {
-          // Fetch all data in parallel
-          const [summary, levels] = await Promise.all([
-            api.fetchSummary(currentUserId),
-            api.fetchLevels(),
-          ]);
 
+        try {
+          const summary = await get().fetchSummary(userId);
           set({
             stats: summary.stats,
-            achievements: summary.nextAchievements || [], // Ensure it's always an array
-            levels,
-            recentPoints: summary.recentPoints || [], // Ensure it's always an array
+            achievements: summary.next_achievements || [],
+            recentPoints: summary.recent_points || [],
             lastSyncTime: new Date().toISOString(),
-            isLoading: false,
-          });
-
-          // Check for new achievements to show as rewards
-          const unseenAchievements = (summary.recentAchievements || []).filter(
-            (ua) => !ua.isSeen
-          );
-          unseenAchievements.forEach((ua) => {
-            const achievement = (summary.nextAchievements || []).find(
-              (a) => a.id === ua.achievementId
-            );
-            if (achievement) {
-              get()._addPendingReward({
-                id: `achievement_${ua.id}`,
-                type: "achievement",
-                achievement,
-                timestamp: ua.unlockedAt,
-              });
-            }
           });
         } catch (error) {
           console.error("Failed to fetch gamification data:", error);
+        } finally {
           set({ isLoading: false });
         }
       },
 
-      syncStats: async () => {
-        const { currentUserId } = get();
-        if (!currentUserId) return;
-
+      fetchStats: async (userId = DEFAULT_USER_ID) => {
         try {
-          const stats = await api.fetchStats(currentUserId);
-          const oldStats = get().stats;
-
-          // Check for level up
-          if (oldStats && stats.currentLevel > oldStats.currentLevel) {
-            const newLevel = get().levels.find(
-              (l) => l.level === stats.currentLevel
+          const response =
+            await gamificationApi.getUserStatsApiV1GamificationStatsUserIdGet(
+              userId
             );
-            if (newLevel) {
-              get()._addPendingReward({
-                id: `level_${stats.currentLevel}`,
-                type: "level_up",
-                newLevel,
-                timestamp: new Date().toISOString(),
-              });
-            }
-          }
-
-          set({ stats, lastSyncTime: new Date().toISOString() });
+          return response.data;
         } catch (error) {
-          console.error("Failed to sync stats:", error);
+          console.error("Failed to fetch stats:", error);
+          // Return default stats on error
+          return {
+            user_id: userId,
+            total_points: 0,
+            current_level: 1,
+            current_level_progress: 0,
+            streak_count: 0,
+            longest_streak: 0,
+            last_active_date: new Date().toISOString(),
+            total_skills_completed: 0,
+            total_todos_completed: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            id: userId,
+            points_to_next_level: 100,
+            next_level_title: "Beginner",
+          };
+        }
+      },
+
+      fetchSummary: async (userId = DEFAULT_USER_ID) => {
+        try {
+          const response =
+            await gamificationApi.getGamificationSummaryApiV1GamificationSummaryUserIdGet(
+              userId
+            );
+          return response.data;
+        } catch (error) {
+          console.error("Failed to fetch summary:", error);
+          // Return default summary on error
+          const stats = await get().fetchStats(userId);
+          return {
+            stats,
+            recent_achievements: [],
+            next_achievements: [],
+            recent_points: [],
+          };
+        }
+      },
+
+      fetchAchievements: async (userId = DEFAULT_USER_ID) => {
+        try {
+          const response =
+            await gamificationApi.getUserAchievementsApiV1GamificationAchievementsUserIdGet(
+              userId
+            );
+          return response.data;
+        } catch (error) {
+          console.error("Failed to fetch achievements:", error);
+          // Return empty achievements on error
+          return [];
+        }
+      },
+
+      fetchLevels: async () => {
+        try {
+          const response =
+            await gamificationApi.getLevelsApiV1GamificationLevelsGet();
+          return response.data;
+        } catch (error) {
+          console.error("Failed to fetch levels:", error);
+          // Return default levels on error
+          return [];
         }
       },
 
       awardPoints: async (
         reason: string,
-        referenceId?: string,
-        metadata?: Record<string, any>
+        points?: number,
+        referenceId?: string
       ) => {
-        const { currentUserId } = get();
-        if (!currentUserId) return;
+        const userId = DEFAULT_USER_ID;
 
         try {
-          // Different point values for different reasons
-          const pointValues: Record<string, number> = {
-            todo_completed: 10,
-            skill_completed: 25,
-            daily_login: 5,
-            streak_bonus: 20,
-          };
+          // Convert reason string to PointsReason enum
+          const pointsReason = reason as PointsReason;
 
-          const points = pointValues[reason] || 10;
-
-          // Add pending reward for immediate UI feedback
-          get()._addPendingReward({
-            id: `points_${Date.now()}`,
-            type: "points",
-            points,
-            timestamp: new Date().toISOString(),
-          });
-
-          // Call API
-          const result = await api.addPoints(
-            currentUserId,
-            points,
-            reason,
+          await gamificationApi.addPointsApiV1GamificationPointsUserIdAddPost(
+            userId,
+            points || 10,
+            pointsReason,
             referenceId
           );
 
-          // Update stats and check for new achievements
-          await get().syncStats();
+          // Add pending reward
+          get()._addPendingReward({
+            id: `reward_${Date.now()}`,
+            type: "points",
+            points: points || 10,
+            timestamp: new Date().toISOString(),
+          });
 
-          if (result.newly_unlocked_achievements > 0) {
-            // Refresh achievements to get latest data
-            const achievements = await api.fetchAchievements(currentUserId);
-            set({ achievements });
-          }
+          // Refresh data
+          await get().fetchData();
         } catch (error) {
           console.error("Failed to award points:", error);
         }
-      },
-
-      markAchievementSeen: async (achievementId: string) => {
-        const { currentUserId } = get();
-        if (!currentUserId) return;
-
-        try {
-          await api.markAchievementSeen(currentUserId, achievementId);
-
-          // Remove from pending rewards
-          const pendingRewards = (get().pendingRewards || []).filter(
-            (r) =>
-              !(r.type === "achievement" && r.achievement?.id === achievementId)
-          );
-          set({ pendingRewards });
-        } catch (error) {
-          console.error("Failed to mark achievement as seen:", error);
-        }
-      },
-
-      showPendingRewards: () => {
-        return get().pendingRewards;
       },
 
       dismissReward: (rewardId: string) => {
@@ -420,8 +240,7 @@ export const useGamificationStore = create<GamificationState>()(
         set({ pendingRewards: [] });
       },
 
-      // Internal methods
-      _updateStats: (newStats: Partial<UserStats>) => {
+      _updateStats: (newStats: Partial<UserStatsResponse>) => {
         const currentStats = get().stats;
         if (currentStats) {
           set({ stats: { ...currentStats, ...newStats } });
@@ -436,54 +255,43 @@ export const useGamificationStore = create<GamificationState>()(
     {
       name: "gamification-store",
       storage: {
-        getItem: async (name: string) => {
-          const value = await AsyncStorage.getItem(name);
+        getItem: async (key: string) => {
+          const value = await AsyncStorage.getItem(key);
           return value ? JSON.parse(value) : null;
         },
-        setItem: async (name: string, value: any) => {
-          await AsyncStorage.setItem(name, JSON.stringify(value));
+        setItem: async (key: string, value: any) => {
+          await AsyncStorage.setItem(key, JSON.stringify(value));
         },
-        removeItem: async (name: string) => {
-          await AsyncStorage.removeItem(name);
+        removeItem: async (key: string) => {
+          await AsyncStorage.removeItem(key);
         },
       },
       partialize: (state) => ({
-        // Only persist essential data, not UI state
         stats: state.stats,
+        achievements: state.achievements,
         levels: state.levels,
+        recentPoints: state.recentPoints,
         lastSyncTime: state.lastSyncTime,
-        currentUserId: state.currentUserId,
       }),
     }
   )
 );
 
-// Hook for easy access to gamification functions
+// Hook with computed values
 export const useGamification = () => {
   const store = useGamificationStore();
 
   return {
-    // Data
-    stats: store.stats,
-    achievements: store.achievements || [],
-    levels: store.levels || [],
-    pendingRewards: store.pendingRewards || [],
-    isLoading: store.isLoading,
+    ...store,
 
-    // Actions
-    awardPoints: store.awardPoints,
-    syncStats: store.syncStats,
-    fetchData: store.fetchGamificationData,
-    markAchievementSeen: store.markAchievementSeen,
-    dismissReward: store.dismissReward,
-    clearAllRewards: store.clearAllRewards,
-
-    // Computed values
-    currentLevel: store.stats?.currentLevel || 1,
-    totalPoints: store.stats?.totalPoints || 0,
-    streakCount: store.stats?.streakCount || 0,
-    progressPercent: store.stats?.currentLevelProgress || 0,
-    pointsToNext: store.stats?.pointsToNextLevel || 0,
-    nextLevelTitle: store.stats?.nextLevelTitle || "Next Level",
+    // Computed values with proper property names
+    currentLevel: store.stats?.current_level || 1,
+    totalPoints: store.stats?.total_points || 0,
+    streakCount: store.stats?.streak_count || 0,
+    progressPercent: store.stats?.current_level_progress || 0,
+    pointsToNext: store.stats?.points_to_next_level || 0,
+    nextLevelTitle: store.stats?.next_level_title || "Next Level",
   };
 };
+
+export default useGamificationStore;

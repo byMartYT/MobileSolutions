@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Trophy } from "lucide-react-native";
+import { AchievementWithProgress } from "@/generated/api";
 import Colors from "@/constants/Colors";
 import { useAppTheme } from "@/hooks/useAppTheme";
 
@@ -11,13 +12,7 @@ const styles = StyleSheet.create({
 });
 
 interface AchievementCardProps {
-  achievement: {
-    id: string;
-    name: string;
-    description: string;
-    isUnlocked: boolean;
-    progress?: number;
-  };
+  achievement: AchievementWithProgress;
   index: number;
 }
 
@@ -31,7 +26,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
     <View
       className="flex-1 p-4 rounded-xl"
       style={
-        achievement.isUnlocked
+        achievement.is_unlocked
           ? styles.gradientYellowOrange
           : { backgroundColor: Colors[colorScheme].onSurfaceLight }
       }
@@ -40,7 +35,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
         <View className="w-12 h-12 rounded-full items-center justify-center mb-3">
           <Trophy
             size={24}
-            color={achievement.isUnlocked ? "#fbbf24" : "#6b7280"}
+            color={achievement.is_unlocked ? "#fbbf24" : "#6b7280"}
           />
         </View>
         <Text
@@ -52,7 +47,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
         <Text className="text-xs text-center mb-2" style={styles.textGray500}>
           {achievement.description}
         </Text>
-        {!achievement.isUnlocked && (
+        {!achievement.is_unlocked && (
           <View
             className="w-full rounded-full h-2"
             style={{ backgroundColor: Colors[colorScheme].onSurface }}

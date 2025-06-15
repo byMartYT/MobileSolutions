@@ -135,7 +135,6 @@ export default function TabLayout() {
           options={{
             title: "Erfolge",
             headerShown: false,
-            sceneStyle: { flex: 1 },
             tabBarIcon: ({ color }) => (
               <TabBarIcon name={Trophy} color={color} />
             ),
