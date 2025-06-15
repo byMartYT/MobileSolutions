@@ -67,14 +67,6 @@ const erfolge = () => {
     ? achievements || []
     : (achievements || []).slice(0, 6);
 
-  const handleDailyLogin = async () => {
-    await awardPoints("daily_login");
-  };
-
-  const handleStreakBoost = async () => {
-    await awardPoints("streak_bonus");
-  };
-
   const { colorScheme } = useAppTheme();
 
   return (
@@ -104,7 +96,6 @@ const erfolge = () => {
             currentStreak={streakCount}
             longestStreak={stats?.longest_streak || 0}
             lastActiveDate={stats?.last_active_date || new Date().toISOString()}
-            onStreakBoost={handleStreakBoost}
             className="flex-1"
           />
           <View className="flex-1 gap-3 space-y-3">
@@ -141,15 +132,17 @@ const erfolge = () => {
                   // Helper function to format date correctly handling UTC
                   const formatDate = (dateString: string) => {
                     // The server returns UTC time without 'Z', so we need to add it
-                    const utcDateString = dateString.includes('Z') ? dateString : dateString + 'Z';
+                    const utcDateString = dateString.includes("Z")
+                      ? dateString
+                      : dateString + "Z";
                     const date = new Date(utcDateString);
-                    
+
                     const now = new Date();
                     const diffMs = now.getTime() - date.getTime();
                     const diffMins = Math.floor(diffMs / (1000 * 60));
                     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
                     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                    
+
                     if (diffMins < 1) {
                       return "gerade eben";
                     } else if (diffMins < 60) {
@@ -174,31 +167,41 @@ const erfolge = () => {
                       return {
                         icon: <Target size={20} color="#3b82f6" />,
                         title: "Todo abgeschlossen",
-                        subtitle: formatDate(pointEntry.created_at || new Date().toISOString()),
+                        subtitle: formatDate(
+                          pointEntry.created_at || new Date().toISOString()
+                        ),
                       };
                     case "skill_completed":
                       return {
                         icon: <Award size={20} color="#10b981" />,
                         title: "Skill abgeschlossen",
-                        subtitle: formatDate(pointEntry.created_at || new Date().toISOString()),
+                        subtitle: formatDate(
+                          pointEntry.created_at || new Date().toISOString()
+                        ),
                       };
                     case "daily_login":
                       return {
                         icon: <Flame size={20} color="#ef4444" />,
                         title: "Tägliche Anmeldung",
-                        subtitle: formatDate(pointEntry.created_at || new Date().toISOString()),
+                        subtitle: formatDate(
+                          pointEntry.created_at || new Date().toISOString()
+                        ),
                       };
                     case "streak_bonus":
                       return {
                         icon: <Flame size={20} color="#ef4444" />,
                         title: "Streak Bonus",
-                        subtitle: formatDate(pointEntry.created_at || new Date().toISOString()),
+                        subtitle: formatDate(
+                          pointEntry.created_at || new Date().toISOString()
+                        ),
                       };
                     default:
                       return {
                         icon: <Award size={20} color="#10b981" />,
                         title: "Punkte erhalten",
-                        subtitle: formatDate(pointEntry.created_at || new Date().toISOString()),
+                        subtitle: formatDate(
+                          pointEntry.created_at || new Date().toISOString()
+                        ),
                       };
                   }
                 };

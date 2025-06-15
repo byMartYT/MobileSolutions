@@ -277,21 +277,34 @@ async def update_user_stats(user_id: str, update: UserStatsUpdate, db: Database 
     
     if update.update_streak is not None and update.update_streak:
         # Update streak logic
-        last_active = datetime.fromisoformat(user_stats.last_active_date.replace('Z', '+00:00'))
+        try:
+            last_active = datetime.fromisoformat(user_stats.last_active_date.replace('Z', '+00:00'))
+        except:
+            # If parsing fails, treat as first time
+            last_active = datetime.min
+            
         today = datetime.now()
         
-        # Check if it's a new day
-        if last_active.date() < today.date():
-            # Check if streak continues (consecutive days)
-            if (today.date() - last_active.date()).days == 1:
-                user_stats.streak_count += 1
-            else:
-                # Streak broken, reset
-                user_stats.streak_count = 1
-            
-            # Update longest streak
-            if user_stats.streak_count > user_stats.longest_streak:
-                user_stats.longest_streak = user_stats.streak_count
+        # Special case: if streak is 0 or it's the first activity, always start at 1
+        if user_stats.streak_count == 0:
+            user_stats.streak_count = 1
+            user_stats.longest_streak = max(user_stats.longest_streak, 1)
+        else:
+            # Check if it's a new day
+            if last_active.date() < today.date():
+                days_diff = (today.date() - last_active.date()).days
+                
+                if days_diff == 1:
+                    # Consecutive day - increment streak
+                    user_stats.streak_count += 1
+                elif days_diff > 1:
+                    # Streak broken - reset to 1 (new start)
+                    user_stats.streak_count = 1
+                # If days_diff == 0, it's the same day, don't change streak
+                
+                # Update longest streak
+                if user_stats.streak_count > user_stats.longest_streak:
+                    user_stats.longest_streak = user_stats.streak_count
     
     # Update timestamps
     user_stats.last_active_date = datetime.now().isoformat()
@@ -334,8 +347,12 @@ async def add_points(
     # Save to points history
     await db.get_collection("points_history").insert_one(points_entry.dict(exclude={"id"}))
     
-    # Update user stats
-    update = UserStatsUpdate(points_to_add=points)
+    # Update user stats - for daily_login, also update streak
+    if reason == PointsReason.DAILY_LOGIN:
+        update = UserStatsUpdate(points_to_add=points, update_streak=True)
+    else:
+        update = UserStatsUpdate(points_to_add=points)
+    
     return await update_user_stats(user_id, update, db)
 
 
@@ -466,3 +483,82 @@ async def get_levels(db: Database = Depends(get_database)):
         result.append(LevelConfig(**level))
     
     return result
+
+
+@router.post("/daily-login/{user_id}")
+async def daily_login(user_id: str, db: Database = Depends(get_database)):
+    """Handle daily login - award points and update streak in one operation."""
+    user_stats = await get_or_create_user_stats(db, user_id)
+    
+    # Check if daily login already happened today
+    try:
+        last_active = datetime.fromisoformat(user_stats.last_active_date.replace('Z', '+00:00'))
+    except:
+        last_active = datetime.min
+        
+    today = datetime.now()
+    
+    # Check if it's a new day
+    if last_active.date() < today.date() or user_stats.streak_count == 0:
+        # Award daily login points
+        points_entry = PointsEntry(
+            user_id=user_id,
+            points=10,
+            reason=PointsReason.DAILY_LOGIN,
+            reference_id=f"daily_login_{today.date()}"
+        )
+        
+        # Save to points history
+        await db.get_collection("points_history").insert_one(points_entry.dict(exclude={"id"}))
+        
+        # Update user stats with both points and streak
+        user_stats.total_points += 10
+        
+        # Update streak logic (same as before)
+        if user_stats.streak_count == 0:
+            user_stats.streak_count = 1
+            user_stats.longest_streak = max(user_stats.longest_streak, 1)
+        else:
+            if last_active.date() < today.date():
+                days_diff = (today.date() - last_active.date()).days
+                
+                if days_diff == 1:
+                    # Consecutive day - increment streak
+                    user_stats.streak_count += 1
+                elif days_diff > 1:
+                    # Streak broken - reset to 1 (new start)
+                    user_stats.streak_count = 1
+                
+                # Update longest streak
+                if user_stats.streak_count > user_stats.longest_streak:
+                    user_stats.longest_streak = user_stats.streak_count
+        
+        # Update timestamps
+        user_stats.last_active_date = today.isoformat()
+        user_stats.updated_at = today.isoformat()
+        
+        # Save to database
+        stats_collection = db.get_collection("user_stats")
+        await stats_collection.update_one(
+            {"user_id": user_id},
+            {"$set": user_stats.dict(exclude={"id"})}
+        )
+        
+        # Check for new achievements
+        newly_unlocked = await check_and_unlock_achievements(db, user_id, user_stats)
+        
+        return {
+            "message": "Daily login successful",
+            "points_awarded": 10,
+            "current_streak": user_stats.streak_count,
+            "newly_unlocked_achievements": len(newly_unlocked),
+            "new_achievements": [ua.dict() for ua in newly_unlocked]
+        }
+    else:
+        return {
+            "message": "Daily login already completed today",
+            "points_awarded": 0,
+            "current_streak": user_stats.streak_count,
+            "newly_unlocked_achievements": 0,
+            "new_achievements": []
+        }

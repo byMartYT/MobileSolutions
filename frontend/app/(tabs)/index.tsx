@@ -20,7 +20,8 @@ import { router } from "expo-router";
 
 export default function Index() {
   const { skills, removeSkill, setSkills } = useStore();
-  const { completeTask, awardPoints, stats, fetchData } = useGamification();
+  const { completeTask, awardPoints, stats, fetchData, updateUserStats } =
+    useGamification();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -36,9 +37,15 @@ export default function Index() {
     fetchData();
   }, []);
 
-  // Check for daily login bonus
+  // Check for daily login bonus - runs when stats change
   useEffect(() => {
     const checkDailyLogin = async () => {
+      if (!stats?.user_id) {
+        return;
+      }
+
+      console.log("🎯 Daily Login Check started for user:", stats.user_id);
+
       if (stats?.last_active_date) {
         const today = new Date();
         const lastActive = new Date(stats.last_active_date);
@@ -47,20 +54,45 @@ export default function Index() {
         const todayDateString = today.toDateString();
         const lastActiveDateString = lastActive.toDateString();
 
+        console.log("🎯 Daily Login Check:", {
+          today: todayDateString,
+          lastActive: lastActiveDateString,
+          isDifferentDay: todayDateString !== lastActiveDateString,
+          lastActiveIso: stats.last_active_date,
+        });
+
         // Award daily login bonus only if it's actually a new day
         if (todayDateString !== lastActiveDateString) {
-          await awardPoints("daily_login");
+          console.log("🎯 EXECUTING daily login bonus - new day detected");
+
+          try {
+            // Award daily login points (this now automatically updates streak in backend)
+            await awardPoints("daily_login");
+            console.log("🎯 Daily login bonus completed successfully");
+          } catch (error) {
+            console.error("🎯 Daily login bonus failed:", error);
+          }
+        } else {
+          console.log("🎯 No daily login bonus - same day");
         }
       } else {
-        // First time login
-        await awardPoints("daily_login");
+        console.log("🎯 EXECUTING first time login - awarding bonus");
+
+        try {
+          // First time login (this now automatically updates streak in backend)
+          await awardPoints("daily_login");
+          console.log("🎯 First time login bonus completed successfully");
+        } catch (error) {
+          console.error("🎯 First time login bonus failed:", error);
+        }
       }
     };
 
-    if (stats) {
+    // Only run if we have stats and they contain an actual last_active_date
+    if (stats?.user_id && stats?.last_active_date !== undefined) {
       checkDailyLogin();
     }
-  }, [stats?.user_id]); // Changed dependency to user_id instead of last_active_date
+  }, [stats?.last_active_date]); // Trigger when last_active_date changes
 
   const handleConfetti = () => {
     if (confettiRef.current) {

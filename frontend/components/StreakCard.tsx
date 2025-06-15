@@ -34,7 +34,6 @@ interface StreakCardProps {
   currentStreak: number;
   longestStreak: number;
   lastActiveDate: string;
-  onStreakBoost?: () => void;
   className?: string;
 }
 
@@ -42,7 +41,6 @@ const StreakCard: React.FC<StreakCardProps> = ({
   currentStreak,
   longestStreak,
   lastActiveDate,
-  onStreakBoost,
   className,
 }) => {
   const getStreakBackgroundStyle = () => {
@@ -123,19 +121,6 @@ const StreakCard: React.FC<StreakCardProps> = ({
           </Text>
         </View>
       </View>
-
-      {/* Action Button */}
-      {onStreakBoost && (
-        <TouchableOpacity
-          onPress={onStreakBoost}
-          className="rounded-xl py-3 items-center"
-          style={styles.bgWhite20}
-        >
-          <Text className="font-semibold" style={styles.textWhite}>
-            {isStreakActive() ? "Streak verlängern" : "Streak starten"}
-          </Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 };
