@@ -1,18 +1,13 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  Alert,
-} from 'react-native';
-import { Sparkles, RotateCcw, Check, ArrowRight } from 'lucide-react-native';
-import { router } from 'expo-router';
-import { useAIConversation, GeneratedSkill } from '@/hooks/useAIConversation';
-import ChatInterface from './ChatInterface';
-import ConversationProgress from './ConversationProgress';
-import Container from '@/components/Container';
-import { api } from '@/api/api';
-import useStore from '@/store/store';
+import React, { useState } from "react";
+import { View, Text, Pressable, Alert } from "react-native";
+import { Sparkles, RotateCcw, Check, ArrowRight } from "lucide-react-native";
+import { router } from "expo-router";
+import { useAIConversation, GeneratedSkill } from "@/hooks/useAIConversation";
+import ChatInterface from "./ChatInterface";
+import ConversationProgress from "./ConversationProgress";
+import Container from "@/components/Container";
+import { api } from "@/api/api";
+import useStore from "@/store/store";
 
 export default function AISkillGenerator() {
   const {
@@ -27,7 +22,9 @@ export default function AISkillGenerator() {
 
   const { addSkill } = useStore();
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedSkill, setGeneratedSkill] = useState<GeneratedSkill | null>(null);
+  const [generatedSkill, setGeneratedSkill] = useState<GeneratedSkill | null>(
+    null
+  );
 
   const handleStartConversation = async () => {
     await startConversation();
@@ -45,8 +42,8 @@ export default function AISkillGenerator() {
         setGeneratedSkill(skill);
       }
     } catch (err) {
-      console.error('Error generating skill:', err);
-      Alert.alert('Fehler', 'Skill konnte nicht generiert werden.');
+      console.error("Error generating skill:", err);
+      Alert.alert("Fehler", "Skill konnte nicht generiert werden.");
     } finally {
       setIsGenerating(false);
     }
@@ -59,41 +56,41 @@ export default function AISkillGenerator() {
       // Create skill via API
       const response = await api.createTodoApiV1TodosPost({
         ...generatedSkill,
-        user: 'default-user',
-        textColor: '#FFFFFF',
+        user: "default-user",
+        textColor: "#FFFFFF",
       });
 
       // Add to local store
       addSkill(response.data);
 
       Alert.alert(
-        'Erfolg! 🎉',
-        'Dein AI-generierter Skill wurde erfolgreich erstellt!',
+        "Erfolg! 🎉",
+        "Dein AI-generierter Skill wurde erfolgreich erstellt!",
         [
           {
-            text: 'Zu Skills',
+            text: "Zu Skills",
             onPress: () => {
               resetConversation();
               setGeneratedSkill(null);
-              router.navigate('/(tabs)/');
+              router.navigate("/(tabs)/");
             },
           },
         ]
       );
     } catch (error) {
-      console.error('Error saving skill:', error);
-      Alert.alert('Fehler', 'Skill konnte nicht gespeichert werden.');
+      console.error("Error saving skill:", error);
+      Alert.alert("Fehler", "Skill konnte nicht gespeichert werden.");
     }
   };
 
   const handleRestart = () => {
     Alert.alert(
-      'Neu starten?',
-      'Möchtest du eine neue Skill-Erstellung beginnen?',
+      "Neu starten?",
+      "Möchtest du eine neue Skill-Erstellung beginnen?",
       [
-        { text: 'Abbrechen', style: 'cancel' },
+        { text: "Abbrechen", style: "cancel" },
         {
-          text: 'Neu starten',
+          text: "Neu starten",
           onPress: () => {
             resetConversation();
             setGeneratedSkill(null);
@@ -116,8 +113,9 @@ export default function AISkillGenerator() {
               AI Skill Generator
             </Text>
             <Text className="text-base text-gray-600 text-center leading-6">
-              Lass die AI dir helfen, den perfekten personalisierten Skill zu erstellen! 
-              Ich führe dich durch ein paar Fragen und erstelle dann einen maßgeschneiderten Lernplan.
+              Lass die AI dir helfen, den perfekten personalisierten Skill zu
+              erstellen! Ich führe dich durch ein paar Fragen und erstelle dann
+              einen maßgeschneiderten Lernplan.
             </Text>
           </View>
 
@@ -164,7 +162,7 @@ export default function AISkillGenerator() {
           <View className="flex-1 p-4">
             <View className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
               <View className="flex-row items-center mb-4">
-                <View 
+                <View
                   className="w-12 h-12 rounded-xl items-center justify-center mr-4"
                   style={{ backgroundColor: generatedSkill.color }}
                 >
@@ -202,9 +200,7 @@ export default function AISkillGenerator() {
                       {index + 1}
                     </Text>
                   </View>
-                  <Text className="flex-1 text-gray-700">
-                    {todo.text}
-                  </Text>
+                  <Text className="flex-1 text-gray-700">{todo.text}</Text>
                 </View>
               ))}
             </View>
@@ -253,9 +249,7 @@ export default function AISkillGenerator() {
 
       {error && (
         <View className="bg-red-50 border-b border-red-200 px-4 py-3">
-          <Text className="text-red-800 text-sm">
-            Fehler: {error}
-          </Text>
+          <Text className="text-red-800 text-sm">Fehler: {error}</Text>
         </View>
       )}
 
@@ -276,13 +270,13 @@ export default function AISkillGenerator() {
             onPress={handleGenerateSkill}
             disabled={isGenerating}
             className={`rounded-xl px-6 py-4 items-center ${
-              isGenerating ? 'bg-gray-300' : 'bg-blue-500'
+              isGenerating ? "bg-gray-300" : "bg-blue-500"
             }`}
           >
             <View className="flex-row items-center">
               <Sparkles size={20} color="white" />
               <Text className="text-white font-semibold text-lg ml-2">
-                {isGenerating ? 'Erstelle Skill...' : 'Skill generieren'}
+                {isGenerating ? "Erstelle Skill..." : "Skill generieren"}
               </Text>
             </View>
           </Pressable>

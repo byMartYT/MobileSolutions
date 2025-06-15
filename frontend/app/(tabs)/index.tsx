@@ -26,9 +26,9 @@ export default function Index() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const [slideAnim] = useState(
+  const slideAnim = useRef(
     new Animated.Value(Dimensions.get("window").height)
-  );
+  ).current;
 
   const confettiRef = useRef(null);
   const completeConfettiRef = useRef(null);

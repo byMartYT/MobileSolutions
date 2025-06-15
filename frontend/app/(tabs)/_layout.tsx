@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   BrainCircuit,
   ListTodo,
@@ -30,9 +30,9 @@ function TabBarIcon(props: { name: React.ElementType; color: string }) {
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const [modalVisible, setModalVisible] = useState(false);
-  const [slideAnim] = useState(
+  const slideAnim = useRef(
     new Animated.Value(Dimensions.get("window").height)
-  );
+  ).current;
 
   const openModal = () => {
     setModalVisible(true);

@@ -56,11 +56,15 @@ const AddChooseModal = ({ modalVisible, closeModal, slideAnim }: Props) => {
       >
         <Pressable style={{ flex: 1 }} onPress={closeModal} />
         <Animated.View
-          style={{
-            transform: [{ translateY: slideAnim }],
-            backgroundColor: Colors[colorScheme].background,
-            paddingBottom: 48,
-          }}
+          style={[
+            {
+              backgroundColor: Colors[colorScheme].background,
+              paddingBottom: 48,
+            },
+            {
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
           className="rounded-t-3xl p-4"
         >
           {/* Header mit Close Button */}

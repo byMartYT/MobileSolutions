@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text } from 'react-native';
-import { CheckCircle, Circle } from 'lucide-react-native';
+import React from "react";
+import { View, Text } from "react-native";
+import { CheckCircle, Circle } from "lucide-react-native";
 
 interface ConversationProgressProps {
   currentState: string;
@@ -8,13 +8,37 @@ interface ConversationProgressProps {
 }
 
 const CONVERSATION_STEPS = [
-  { key: 'collecting_domain', label: 'Skill-Bereich', description: 'Was möchtest du lernen?' },
-  { key: 'collecting_goals', label: 'Ziele', description: 'Was willst du erreichen?' },
-  { key: 'collecting_difficulty', label: 'Erfahrung', description: 'Dein aktuelles Level' },
-  { key: 'collecting_timeframe', label: 'Zeitrahmen', description: 'Wann willst du es schaffen?' },
-  { key: 'collecting_preferences', label: 'Präferenzen', description: 'Persönliche Wünsche' },
-  { key: 'generating', label: 'Generierung', description: 'AI erstellt deinen Skill' },
-  { key: 'complete', label: 'Fertig', description: 'Skill ist bereit!' },
+  {
+    key: "collecting_domain",
+    label: "Skill-Bereich",
+    description: "Was möchtest du lernen?",
+  },
+  {
+    key: "collecting_goals",
+    label: "Ziele",
+    description: "Was willst du erreichen?",
+  },
+  {
+    key: "collecting_difficulty",
+    label: "Erfahrung",
+    description: "Dein aktuelles Level",
+  },
+  {
+    key: "collecting_timeframe",
+    label: "Zeitrahmen",
+    description: "Wann willst du es schaffen?",
+  },
+  {
+    key: "collecting_preferences",
+    label: "Präferenzen",
+    description: "Persönliche Wünsche",
+  },
+  {
+    key: "generating",
+    label: "Generierung",
+    description: "AI erstellt deinen Skill",
+  },
+  { key: "complete", label: "Fertig", description: "Skill ist bereit!" },
 ];
 
 export default function ConversationProgress({
@@ -22,7 +46,7 @@ export default function ConversationProgress({
   progressPercentage,
 }: ConversationProgressProps) {
   const getCurrentStepIndex = () => {
-    return CONVERSATION_STEPS.findIndex(step => step.key === currentState);
+    return CONVERSATION_STEPS.findIndex((step) => step.key === currentState);
   };
 
   const currentStepIndex = getCurrentStepIndex();
@@ -32,12 +56,8 @@ export default function ConversationProgress({
       {/* Progress Bar */}
       <View className="mb-4">
         <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-sm font-medium text-gray-900">
-            Fortschritt
-          </Text>
-          <Text className="text-sm text-gray-500">
-            {progressPercentage}%
-          </Text>
+          <Text className="text-sm font-medium text-gray-900">Fortschritt</Text>
+          <Text className="text-sm text-gray-500">{progressPercentage}%</Text>
         </View>
         <View className="w-full bg-gray-200 rounded-full h-2">
           <View
@@ -68,30 +88,36 @@ export default function ConversationProgress({
 
           return (
             <View key={step.key} className="items-center min-w-[80px]">
-              <View className={`w-8 h-8 rounded-full items-center justify-center mb-2 ${
-                isCompleted 
-                  ? 'bg-green-500' 
-                  : isCurrent 
-                    ? 'bg-blue-500' 
-                    : 'bg-gray-200'
-              }`}>
+              <View
+                className={`w-8 h-8 rounded-full items-center justify-center mb-2 ${
+                  isCompleted
+                    ? "bg-green-500"
+                    : isCurrent
+                    ? "bg-blue-500"
+                    : "bg-gray-200"
+                }`}
+              >
                 {isCompleted ? (
                   <CheckCircle size={16} color="white" />
                 ) : (
-                  <Text className={`text-xs font-bold ${
-                    isCurrent ? 'text-white' : 'text-gray-400'
-                  }`}>
+                  <Text
+                    className={`text-xs font-bold ${
+                      isCurrent ? "text-white" : "text-gray-400"
+                    }`}
+                  >
                     {index + 1}
                   </Text>
                 )}
               </View>
-              <Text className={`text-xs text-center font-medium ${
-                isCompleted 
-                  ? 'text-green-600' 
-                  : isCurrent 
-                    ? 'text-blue-600' 
-                    : 'text-gray-400'
-              }`}>
+              <Text
+                className={`text-xs text-center font-medium ${
+                  isCompleted
+                    ? "text-green-600"
+                    : isCurrent
+                    ? "text-blue-600"
+                    : "text-gray-400"
+                }`}
+              >
                 {step.label}
               </Text>
             </View>
@@ -103,10 +129,12 @@ export default function ConversationProgress({
 }
 
 // Simple horizontal scroll wrapper
-function ScrollViewHorizontal({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <View className={className}>
-      {children}
-    </View>
-  );
+function ScrollViewHorizontal({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return <View className={className}>{children}</View>;
 }
