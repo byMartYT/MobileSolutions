@@ -28,7 +28,7 @@ export default function StepsManager({
         value={nextTodo}
         onChangeText={onNextTodoChange}
         placeholder="z.B. Laufschuhe kaufen"
-        className="border border-gray-300 rounded-xl p-4 text-base bg-white"
+        className="border border-gray-300 rounded-xl p-4 bg-white"
         maxLength={50}
         returnKeyType="done"
         onSubmitEditing={onAddStep}

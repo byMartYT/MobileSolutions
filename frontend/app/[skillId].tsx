@@ -4,9 +4,10 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import React, { useLayoutEffect, useState, useEffect } from "react";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation, router } from "expo-router";
 import { api } from "@/api/api";
 import { Todo } from "@/generated/api";
 import Container from "@/components/Container";
@@ -16,14 +17,28 @@ import IconSelector from "@/components/IconSelector";
 import SkillPreview from "@/components/SkillPreview";
 import StepsManager from "@/components/StepsManager";
 import Button from "@/components/Button";
+import useStore from "@/store/store";
 
 const EditSkill = () => {
   const { skillId } = useLocalSearchParams();
+  const navigation = useNavigation();
+  const { updateSkill } = useStore();
+
+  // Original skill data
   const [skill, setSkill] = useState<Todo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const navigation = useNavigation();
+  // Form state
+  const [title, setTitle] = useState("");
+  const [goal, setGoal] = useState("");
+  const [color, setColor] = useState("hsl(210, 64%, 62%)");
+  const [icon, setIcon] = useState("Target");
+  const [steps, setSteps] = useState<string[]>([]);
+  const [nextTodo, setNextTodo] = useState("");
+
+  // UI state
+  const [isLoading, setIsLoading] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -33,6 +48,7 @@ const EditSkill = () => {
     });
   });
 
+  // Load skill data and populate form
   useEffect(() => {
     const fetchSkill = async () => {
       if (!skillId || typeof skillId !== "string") {
@@ -44,7 +60,20 @@ const EditSkill = () => {
       try {
         setLoading(true);
         const response = await api.getTodoApiV1TodosTodoIdGet(skillId);
-        setSkill(response.data);
+        const skillData = response.data;
+
+        setSkill(skillData);
+
+        // Populate form with existing data
+        setTitle(skillData.title || "");
+        setGoal(skillData.goal || "");
+        setColor(skillData.color || "hsl(210, 64%, 62%)");
+        setIcon(skillData.icon || "Target");
+
+        // Convert todos to steps
+        const todoSteps = skillData.todos?.map((todo) => todo.text) || [];
+        setSteps(todoSteps);
+
         setError(null);
       } catch (err) {
         console.error("Error fetching skill:", err);
@@ -56,6 +85,100 @@ const EditSkill = () => {
 
     fetchSkill();
   }, [skillId]);
+
+  // Step management functions
+  const moveStepUp = (index: number) => {
+    if (index > 0) {
+      const newSteps = [...steps];
+      [newSteps[index - 1], newSteps[index]] = [
+        newSteps[index],
+        newSteps[index - 1],
+      ];
+      setSteps(newSteps);
+    }
+  };
+
+  const moveStepDown = (index: number) => {
+    if (index < steps.length - 1) {
+      const newSteps = [...steps];
+      [newSteps[index], newSteps[index + 1]] = [
+        newSteps[index + 1],
+        newSteps[index],
+      ];
+      setSteps(newSteps);
+    }
+  };
+
+  const handleAddStep = () => {
+    if (nextTodo.trim()) {
+      setSteps([...steps, nextTodo.trim()]);
+      setNextTodo("");
+    }
+  };
+
+  const handleRemoveStep = (index: number) => {
+    setSteps(steps.filter((_, i) => i !== index));
+  };
+
+  // Save updated skill
+  const handleSave = async () => {
+    if (!title.trim() || !goal.trim()) {
+      Alert.alert("Fehler", "Bitte füllen Sie alle Felder aus.");
+      return;
+    }
+
+    if (!skill?.id) {
+      Alert.alert("Fehler", "Skill ID nicht gefunden.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Convert steps back to todos, preserving existing todo IDs where possible
+      const updatedTodos = steps.map((step, index) => {
+        const existingTodo = skill.todos?.[index];
+        return {
+          text: step.trim(),
+          status: existingTodo?.status || false,
+          id:
+            existingTodo?.id ||
+            `todo_${Date.now()}_${index}_${Math.random()
+              .toString(36)
+              .substr(2, 9)}`,
+        };
+      });
+
+      const updatedSkill = {
+        title: title.trim(),
+        goal: goal.trim(),
+        color: String(color),
+        icon,
+        user: skill.user,
+        textColor: skill.textColor || "#FFFFFF",
+        tip: skill.tip || "",
+        todos: updatedTodos,
+      };
+
+      // Update via API
+      const response = await api.updateTodoApiV1TodosTodoIdPut(
+        skill.id,
+        updatedSkill
+      );
+
+      // Update local store
+      updateSkill(response.data);
+
+      Alert.alert("Erfolg", "Skill wurde erfolgreich aktualisiert!", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+    } catch (error) {
+      console.error("Fehler beim Aktualisieren des Skills:", error);
+      Alert.alert("Fehler", "Skill konnte nicht aktualisiert werden.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -80,55 +203,46 @@ const EditSkill = () => {
       keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
     >
       <View className="flex-1 bg-gray-50">
-        <Container>
+        <Container isHeaderShown={true}>
           <ScrollView
-            className="flex-1"
+            className="flex-1 gap-4"
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <View
-              className="gap-4 py-4"
-              style={{ paddingTop: 16, paddingVertical: 48 }}
+            <SkillFormInput
+              title={title}
+              goal={goal}
+              onTitleChange={setTitle}
+              onGoalChange={setGoal}
+            />
+
+            <ColorSelector selectedColor={color} onColorSelect={setColor} />
+
+            <IconSelector
+              selectedIcon={icon}
+              onIconSelect={setIcon}
+              selectedColor={color}
+            />
+
+            <SkillPreview title={title} goal={goal} color={color} icon={icon} />
+
+            <StepsManager
+              steps={steps}
+              nextTodo={nextTodo}
+              onNextTodoChange={setNextTodo}
+              onAddStep={handleAddStep}
+              onRemoveStep={handleRemoveStep}
+              onMoveStepUp={moveStepUp}
+              onMoveStepDown={moveStepDown}
+            />
+
+            <Button
+              onPress={handleSave}
+              disabled={isLoading || !title.trim() || !goal.trim()}
             >
-              <SkillFormInput
-                title={title}
-                goal={goal}
-                onTitleChange={setTitle}
-                onGoalChange={setGoal}
-              />
-
-              <ColorSelector selectedColor={color} onColorSelect={setColor} />
-
-              <IconSelector
-                selectedIcon={icon}
-                onIconSelect={setIcon}
-                selectedColor={color}
-              />
-
-              <SkillPreview
-                title={title}
-                goal={goal}
-                color={color}
-                icon={icon}
-              />
-
-              <StepsManager
-                steps={steps}
-                nextTodo={nextTodo}
-                onNextTodoChange={setNextTodo}
-                onAddStep={handleAddStep}
-                onRemoveStep={handleRemoveStep}
-                onMoveStepUp={moveStepUp}
-                onMoveStepDown={moveStepDown}
-              />
-
-              <Button
-                onPress={handleSave}
-                disabled={isLoading || !title.trim() || !goal.trim()}
-              >
-                {isLoading ? "Wird erstellt..." : "Skill erstellen"}
-              </Button>
-            </View>
+              {isLoading ? "Wird aktualisiert..." : "Skill aktualisieren"}
+            </Button>
+            <View style={{ height: 24 }} />
           </ScrollView>
         </Container>
       </View>

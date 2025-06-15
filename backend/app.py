@@ -3,7 +3,7 @@ from fastapi.routing import APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo.database import Database
 from database import get_database
-from routers import todo, gamification
+from routers import todo, gamification, ai
 from db_setup import setup_database
 
 app = FastAPI(title="MobileSolutions API")
@@ -44,6 +44,9 @@ api_router.include_router(todo.router)
 
 # Include the gamification router
 api_router.include_router(gamification.router)
+
+# Include the AI router
+api_router.include_router(ai.router, prefix="/ai", tags=["AI Skill Generator"])
 
 # Include the main API router
 app.include_router(api_router)

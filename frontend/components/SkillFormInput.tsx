@@ -25,7 +25,7 @@ export default function SkillFormInput({
           value={title}
           onChangeText={onTitleChange}
           placeholder="z.B. Halbmarathon"
-          className="border border-gray-300 rounded-xl p-4 text-base bg-white"
+          className="border border-gray-300 rounded-xl p-4 bg-white"
           maxLength={50}
         />
       </View>
@@ -41,7 +41,7 @@ export default function SkillFormInput({
           placeholder="Beschreiben Sie Ihr Lernziel..."
           multiline
           numberOfLines={4}
-          className="border border-gray-300 rounded-xl p-4 text-base bg-white"
+          className="border border-gray-300 rounded-xl p-4 bg-white"
           textAlignVertical="top"
           maxLength={200}
         />
