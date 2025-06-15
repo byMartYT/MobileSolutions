@@ -45,50 +45,6 @@ const StreakCard: React.FC<StreakCardProps> = ({
   onStreakBoost,
   className,
 }) => {
-  const flameAnimation = useRef(new Animated.Value(1)).current;
-  const streakPulse = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    // Flame flicker animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(flameAnimation, {
-          toValue: 1.2,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameAnimation, {
-          toValue: 0.9,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameAnimation, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Streak counter pulse
-    if (currentStreak > 0) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(streakPulse, {
-            toValue: 1.05,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(streakPulse, {
-            toValue: 1,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    }
-  }, [currentStreak]);
-
   const getStreakBackgroundStyle = () => {
     if (currentStreak >= 30) return styles.streakBgPurple;
     if (currentStreak >= 14) return styles.streakBgRed;
@@ -120,7 +76,7 @@ const StreakCard: React.FC<StreakCardProps> = ({
     >
       {/* Header */}
       <View className="flex-row items-center justify-between mb-4">
-        <View className="flex-row items-center">
+        <View className="flex-row items-center gap-2">
           <Flame size={32} color={currentStreak > 0 ? "#ff6b35" : "#9CA2AC"} />
           <View>
             <Text className="text-lg font-bold" style={styles.textWhite}>
@@ -131,32 +87,13 @@ const StreakCard: React.FC<StreakCardProps> = ({
             </Text>
           </View>
         </View>
-
-        {/* Active Indicator */}
-        <View
-          className="px-3 py-1 rounded-full"
-          style={isStreakActive() ? styles.bgGreen50030 : styles.bgRed50030}
-        >
-          <Text
-            className="text-xs font-semibold"
-            style={isStreakActive() ? styles.textGreen200 : styles.textRed200}
-          >
-            {isStreakActive() ? "Aktiv" : "Unterbrochen"}
-          </Text>
-        </View>
       </View>
 
       {/* Main Streak Display */}
       <View className="items-center mb-4">
-        <Animated.View
-          style={{
-            transform: [{ scale: streakPulse }],
-          }}
-        >
-          <Text className="text-4xl font-bold" style={styles.textWhite}>
-            {currentStreak}
-          </Text>
-        </Animated.View>
+        <Text className="text-4xl font-bold" style={styles.textWhite}>
+          {currentStreak}
+        </Text>
         <Text className="text-lg" style={styles.textWhite80}>
           {currentStreak === 1 ? "Tag" : "Tage"}
         </Text>

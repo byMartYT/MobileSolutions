@@ -1,57 +1,20 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  Animated,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, Text, ScrollView, Animated, StyleSheet } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import Container from "../../components/Container";
 import Title from "../../components/Title";
 import LevelProgressCard from "../../components/LevelProgressCard";
 import StreakCard from "../../components/StreakCard";
+import StatsCard from "../../components/StatsCard";
+import ActivityItem from "../../components/ActivityItem";
+import AchievementCard from "../../components/AchievementCard";
+import PlaceholderAchievementCard from "../../components/PlaceholderAchievementCard";
+import RewardOverlay from "../../components/RewardOverlay";
 import { useGamification } from "../../store/gamificationStore";
-import {
-  Trophy,
-  Flame,
-  Target,
-  Award,
-  Zap,
-  Calendar,
-  ChevronRight,
-  BarChart3,
-} from "lucide-react-native";
-import clsx from "clsx";
+import { Target, Award, Flame } from "lucide-react-native";
 
 const styles = StyleSheet.create({
   // Text colors
   textBlack: { color: "#000000" },
-  textWhite: { color: "#ffffff" },
-  textGray400: { color: "#9ca3af" },
-  textGray500: { color: "#6b7280" },
-  textGray600: { color: "#4b5563" },
-  textGray900: { color: "#111827" },
-  textBlue400: { color: "#60a5fa" },
-  textGreen400: { color: "#4ade80" },
-  textBlackOpacity60: { color: "rgba(0, 0, 0, 0.6)" },
-
-  // Background colors
-  bgWhite: { backgroundColor: "#ffffff" },
-  bgGray700: { backgroundColor: "#374151" },
-  bgGray800: { backgroundColor: "#1f2937" },
-  bgBlue500: { backgroundColor: "#3b82f6" },
-  bgBlue600: { backgroundColor: "#2563eb" },
-  bgBlue50020: { backgroundColor: "rgba(59, 130, 246, 0.2)" },
-  bgGreen50020: { backgroundColor: "rgba(16, 185, 129, 0.2)" },
-  bgGreen500: { backgroundColor: "#10b981" },
-  bgYellow50030: { backgroundColor: "rgba(251, 191, 36, 0.3)" },
-  bgYellow50020: { backgroundColor: "rgba(251, 191, 36, 0.2)" },
-  bgOrange50020: { backgroundColor: "rgba(249, 115, 22, 0.2)" },
-  bgBlackOpacity60: { backgroundColor: "rgba(0, 0, 0, 0.6)" },
-
-  // Gradients (we'll use single colors as fallback)
-  gradientYellowOrange: { backgroundColor: "rgba(251, 191, 36, 0.2)" },
 });
 
 const erfolge = () => {
@@ -231,213 +194,12 @@ const erfolge = () => {
       </ScrollView>
 
       {/* Pending Rewards Overlay */}
-      {pendingRewards.length > 0 && (
-        <Animated.View
-          style={[
-            {
-              transform: [{ scale: rewardAnimation }],
-              opacity: rewardAnimation,
-            },
-            styles.bgBlackOpacity60,
-          ]}
-          className="absolute inset-0 flex items-center justify-center"
-        >
-          <View
-            className="rounded-2xl p-6 mx-8 max-w-sm"
-            style={styles.bgWhite}
-          >
-            <View className="items-center">
-              <Zap size={48} color="#fbbf24" />
-              <Text
-                className="text-xl font-bold mt-4 mb-2"
-                style={styles.textGray900}
-              >
-                Belohnung erhalten!
-              </Text>
-              {pendingRewards[0]?.type === "points" && (
-                <Text className="text-center" style={styles.textGray600}>
-                  Du hast {pendingRewards[0].points} Punkte erhalten!
-                </Text>
-              )}
-              {pendingRewards[0]?.type === "achievement" && (
-                <Text className="text-center" style={styles.textGray600}>
-                  Achievement "{pendingRewards[0].achievement?.name}"
-                  freigeschaltet!
-                </Text>
-              )}
-              {pendingRewards[0]?.type === "level_up" && (
-                <Text className="text-center" style={styles.textGray600}>
-                  Level {pendingRewards[0].newLevel?.level} erreicht!
-                </Text>
-              )}
-              <TouchableOpacity
-                onPress={clearAllRewards}
-                className="px-6 py-3 rounded-xl mt-4"
-                style={styles.bgBlue600}
-              >
-                <Text className="font-semibold" style={styles.textWhite}>
-                  Weiter
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Animated.View>
-      )}
+      <RewardOverlay
+        pendingRewards={pendingRewards}
+        rewardAnimation={rewardAnimation}
+        onClearRewards={clearAllRewards}
+      />
     </Container>
-  );
-};
-
-// Component: StatsCard
-const StatsCard = ({
-  icon,
-  title,
-  value,
-  subtitle,
-  color,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  value: string | number;
-  subtitle: string;
-  color: string;
-}) => {
-  const bgStyle = color.includes("blue")
-    ? styles.bgBlue50020
-    : styles.bgGreen50020;
-
-  return (
-    <View className="rounded-xl p-4 flex-1" style={bgStyle}>
-      <View className="flex-row items-center justify-between mb-2">
-        {icon}
-        <Text className="text-2xl font-bold" style={styles.textBlack}>
-          {value}
-        </Text>
-      </View>
-      <Text className="font-medium" style={styles.textBlack}>
-        {title}
-      </Text>
-      <Text className="text-xs" style={styles.textBlackOpacity60}>
-        {subtitle}
-      </Text>
-    </View>
-  );
-};
-
-// Component: ActivityItem
-const ActivityItem = ({
-  icon,
-  title,
-  subtitle,
-  points,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  points: number;
-}) => (
-  <View
-    className="rounded-xl p-4 flex-row items-center"
-    style={styles.bgGray800}
-  >
-    <View className="mr-3">{icon}</View>
-    <View className="flex-1">
-      <Text className="font-medium" style={styles.textWhite}>
-        {title}
-      </Text>
-      <Text className="text-sm" style={styles.textGray400}>
-        {subtitle}
-      </Text>
-    </View>
-    <View className="px-3 py-1 rounded-full" style={styles.bgGreen50020}>
-      <Text className="font-medium" style={styles.textGreen400}>
-        +{points}
-      </Text>
-    </View>
-  </View>
-);
-
-// Component: AchievementCard
-const AchievementCard = ({
-  achievement,
-  index,
-}: {
-  achievement: any;
-  index: number;
-}) => (
-  <View
-    className="flex-1 p-4 rounded-xl"
-    style={
-      achievement.isUnlocked ? styles.gradientYellowOrange : styles.bgGray800
-    }
-  >
-    <View className="items-center">
-      <View
-        className="w-12 h-12 rounded-full items-center justify-center mb-3"
-        style={achievement.isUnlocked ? styles.bgYellow50030 : styles.bgGray700}
-      >
-        <Trophy
-          size={24}
-          color={achievement.isUnlocked ? "#fbbf24" : "#6b7280"}
-        />
-      </View>
-      <Text
-        className="font-medium text-center mb-1"
-        style={achievement.isUnlocked ? styles.textBlack : styles.textGray400}
-      >
-        {achievement.name}
-      </Text>
-      <Text className="text-xs text-center mb-2" style={styles.textGray500}>
-        {achievement.description}
-      </Text>
-      {!achievement.isUnlocked && (
-        <View className="w-full rounded-full h-2" style={styles.bgGray700}>
-          <View
-            className="h-2 rounded-full"
-            style={[styles.bgBlue500, { width: `${achievement.progress}%` }]}
-          />
-        </View>
-      )}
-    </View>
-  </View>
-);
-
-// Component: PlaceholderAchievementCard
-const PlaceholderAchievementCard = ({ index }: { index: number }) => {
-  const placeholderAchievements = [
-    { name: "Erster Schritt", description: "Dein erstes Todo erledigen" },
-    { name: "Aufsteiger", description: "Level 5 erreichen" },
-    { name: "Beständig", description: "7 Tage Streak halten" },
-    { name: "Fleißig", description: "10 Skills abschließen" },
-    { name: "Sammler", description: "100 Punkte sammeln" },
-    { name: "Meister", description: "Level 10 erreichen" },
-  ];
-
-  const achievement =
-    placeholderAchievements[index] || placeholderAchievements[0];
-
-  return (
-    <View className="flex-1 p-4 rounded-xl" style={styles.bgGray800}>
-      <View className="items-center">
-        <View
-          className="w-12 h-12 rounded-full items-center justify-center mb-3"
-          style={styles.bgGray700}
-        >
-          <Trophy size={24} color="#6b7280" />
-        </View>
-        <Text className="font-medium text-center mb-1" style={styles.textWhite}>
-          {achievement.name}
-        </Text>
-        <Text className="text-xs text-center mb-2" style={styles.textGray500}>
-          {achievement.description}
-        </Text>
-        <View className="w-full rounded-full h-2" style={styles.bgGray700}>
-          <View
-            className="h-2 rounded-full"
-            style={[styles.bgBlue500, { width: `${(index + 1) * 15}%` }]}
-          />
-        </View>
-      </View>
-    </View>
   );
 };
 

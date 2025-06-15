@@ -3,7 +3,6 @@ import Title from "@/components/Title";
 import useStore from "@/store/store";
 import SkillItem from "@/components/SkillItem";
 import Container from "@/components/Container";
-import QuickStatsBar from "../../components/QuickStatsBar";
 import { useGamification } from "@/store/gamificationStore";
 import {
   FlatList,
