@@ -8,6 +8,7 @@ import {
   PointsEntry,
   LevelConfig,
   PointsReason,
+  UserStatsUpdate,
 } from "@/generated/api";
 import { Configuration } from "@/generated/configuration";
 
@@ -80,6 +81,11 @@ interface GamificationState {
     points?: number,
     referenceId?: string
   ) => Promise<void>;
+  updateUserStats: (update: UserStatsUpdate) => Promise<void>;
+  completeTask: (
+    taskType: "todo" | "skill",
+    referenceId?: string
+  ) => Promise<void>;
   dismissReward: (rewardId: string) => void;
   clearAllRewards: () => void;
 
@@ -104,18 +110,37 @@ export const useGamificationStore = create<GamificationState>()(
       // Methods
       fetchData: async () => {
         const userId = DEFAULT_USER_ID;
+        console.log("🎮 fetchData: Starting to fetch data for user:", userId);
         set({ isLoading: true });
 
         try {
-          const summary = await get().fetchSummary(userId);
+          const [summary, achievements] = await Promise.all([
+            get().fetchSummary(userId),
+            get().fetchAchievements(userId),
+          ]);
+
+          console.log(
+            "🎮 fetchData: Received data - Points:",
+            summary.stats.total_points,
+            "Todos:",
+            summary.stats.total_todos_completed,
+            "Skills:",
+            summary.stats.total_skills_completed
+          );
+
           set({
             stats: summary.stats,
-            achievements: summary.next_achievements || [],
+            achievements: achievements || [],
             recentPoints: summary.recent_points || [],
             lastSyncTime: new Date().toISOString(),
           });
+
+          console.log("🎮 fetchData: Store updated successfully");
         } catch (error) {
-          console.error("Failed to fetch gamification data:", error);
+          console.error(
+            "🎮 fetchData: Failed to fetch gamification data:",
+            error
+          );
         } finally {
           set({ isLoading: false });
         }
@@ -229,6 +254,100 @@ export const useGamificationStore = create<GamificationState>()(
         }
       },
 
+      updateUserStats: async (update: UserStatsUpdate) => {
+        const userId = DEFAULT_USER_ID;
+
+        try {
+          await gamificationApi.updateUserStatsApiV1GamificationStatsUserIdUpdatePost(
+            userId,
+            update
+          );
+
+          // Refresh data to get updated stats
+          await get().fetchData();
+        } catch (error) {
+          console.error("Failed to update user stats:", error);
+        }
+      },
+
+      completeTask: async (
+        taskType: "todo" | "skill",
+        referenceId?: string
+      ) => {
+        const userId = DEFAULT_USER_ID;
+        console.log(
+          `🎮 completeTask: Starting ${taskType} completion for user:`,
+          userId,
+          "reference:",
+          referenceId
+        );
+
+        try {
+          if (taskType === "todo") {
+            console.log("🎮 completeTask: Completing todo...");
+            // Award points and update todo stats
+            const [pointsResult, statsResult] = await Promise.all([
+              gamificationApi.addPointsApiV1GamificationPointsUserIdAddPost(
+                userId,
+                10,
+                PointsReason.TodoCompleted,
+                referenceId
+              ),
+              gamificationApi.updateUserStatsApiV1GamificationStatsUserIdUpdatePost(
+                userId,
+                { todos_completed: 1, update_streak: true }
+              ),
+            ]);
+
+            console.log(
+              "🎮 completeTask: Todo API calls completed successfully"
+            );
+
+            // Add pending reward
+            get()._addPendingReward({
+              id: `reward_${Date.now()}`,
+              type: "points",
+              points: 10,
+              timestamp: new Date().toISOString(),
+            });
+          } else if (taskType === "skill") {
+            console.log("🎮 completeTask: Completing skill...");
+            // Award bonus points for completing skill
+            await Promise.all([
+              gamificationApi.addPointsApiV1GamificationPointsUserIdAddPost(
+                userId,
+                25,
+                PointsReason.SkillCompleted,
+                referenceId
+              ),
+              gamificationApi.updateUserStatsApiV1GamificationStatsUserIdUpdatePost(
+                userId,
+                { skills_completed: 1, update_streak: true }
+              ),
+            ]);
+
+            // Add pending reward
+            get()._addPendingReward({
+              id: `reward_${Date.now()}`,
+              type: "points",
+              points: 25,
+              timestamp: new Date().toISOString(),
+            });
+          }
+
+          // Refresh data to get updated stats and check for new achievements
+          console.log("🎮 completeTask: Refreshing data...");
+          await get().fetchData();
+
+          // Force a re-render by updating a timestamp
+          set({ lastSyncTime: new Date().toISOString() });
+
+          console.log("🎮 completeTask: Task completion finished successfully");
+        } catch (error) {
+          console.error("🎮 completeTask: Failed to complete task:", error);
+        }
+      },
+
       dismissReward: (rewardId: string) => {
         const pendingRewards = (get().pendingRewards || []).filter(
           (r) => r.id !== rewardId
@@ -267,7 +386,8 @@ export const useGamificationStore = create<GamificationState>()(
         },
       },
       partialize: (state) => ({
-        stats: state.stats,
+        // Don't persist stats to always get fresh data from API
+        // stats: state.stats,
         achievements: state.achievements,
         levels: state.levels,
         recentPoints: state.recentPoints,
@@ -280,6 +400,14 @@ export const useGamificationStore = create<GamificationState>()(
 // Hook with computed values
 export const useGamification = () => {
   const store = useGamificationStore();
+
+  // Log the current stats for debugging
+  console.log("🎮 useGamification: Hook called with stats:", {
+    total_points: store.stats?.total_points,
+    total_todos_completed: store.stats?.total_todos_completed,
+    total_skills_completed: store.stats?.total_skills_completed,
+    lastSyncTime: store.lastSyncTime,
+  });
 
   return {
     ...store,

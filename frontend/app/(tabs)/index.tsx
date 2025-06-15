@@ -11,6 +11,7 @@ import {
   Pressable,
   Animated,
   Dimensions,
+  Text,
 } from "react-native";
 import { Confetti } from "react-native-fast-confetti";
 import { api } from "@/api/api";
@@ -19,7 +20,7 @@ import { router } from "expo-router";
 
 export default function Index() {
   const { skills, removeSkill, setSkills } = useStore();
-  const { awardPoints, stats } = useGamification();
+  const { completeTask, awardPoints, stats, fetchData } = useGamification();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -30,13 +31,18 @@ export default function Index() {
   const confettiRef = useRef(null);
   const completeConfettiRef = useRef(null);
 
+  // Load gamification data on component mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   // Check for daily login bonus
   useEffect(() => {
     const checkDailyLogin = async () => {
       if (stats?.last_active_date) {
         const today = new Date();
         const lastActive = new Date(stats.last_active_date);
-        
+
         // Check if it's actually a different day (not just a different time)
         const todayDateString = today.toDateString();
         const lastActiveDateString = lastActive.toDateString();
@@ -133,6 +139,40 @@ export default function Index() {
         }
         ListHeaderComponent={
           <View style={{ paddingTop: 20 }}>
+            {/* Debug Stats Display */}
+            <View
+              style={{
+                marginBottom: 20,
+                padding: 10,
+                backgroundColor: "#f0f0f0",
+                borderRadius: 8,
+              }}
+            >
+              <Text style={{ fontSize: 12, color: "#333" }}>
+                DEBUG: Points: {stats?.total_points || 0} | Todos:{" "}
+                {stats?.total_todos_completed || 0} | Skills:{" "}
+                {stats?.total_skills_completed || 0}
+              </Text>
+              <Pressable
+                onPress={async () => {
+                  console.log("🧪 TEST: Manual task completion test");
+                  await completeTask("todo", "test_todo_manual");
+                }}
+                style={{
+                  backgroundColor: "#007AFF",
+                  padding: 8,
+                  borderRadius: 4,
+                  marginTop: 5,
+                }}
+              >
+                <Text
+                  style={{ color: "white", textAlign: "center", fontSize: 12 }}
+                >
+                  TEST: Complete Todo
+                </Text>
+              </Pressable>
+            </View>
+
             <View className="flex-row items-center justify-between mb-4">
               <Title className="">Deine Lernziele</Title>
               <Pressable

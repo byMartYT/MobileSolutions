@@ -23,6 +23,7 @@ const erfolge = () => {
   const {
     stats,
     achievements,
+    recentPoints,
     pendingRewards,
     isLoading,
     currentLevel,
@@ -133,24 +134,92 @@ const erfolge = () => {
             Letzte Aktivität
           </Text>
           <View className="gap-3">
-            <ActivityItem
-              icon={<Target size={20} color="#3b82f6" />}
-              title="Todo abgeschlossen"
-              subtitle="vor 2 Stunden"
-              points={10}
-            />
-            <ActivityItem
-              icon={<Flame size={20} color="#ef4444" />}
-              title="Streak verlängert"
-              subtitle="vor 1 Tag"
-              points={20}
-            />
-            <ActivityItem
-              icon={<Award size={20} color="#10b981" />}
-              title="Achievement freigeschaltet"
-              subtitle="vor 3 Tagen"
-              points={50}
-            />
+            {recentPoints && recentPoints.length > 0 ? (
+              recentPoints.slice(0, 5).map((pointEntry, index) => {
+                // Map point reasons to display information
+                const getActivityInfo = (reason: string) => {
+                  // Helper function to format date correctly handling UTC
+                  const formatDate = (dateString: string) => {
+                    // The server returns UTC time without 'Z', so we need to add it
+                    const utcDateString = dateString.includes('Z') ? dateString : dateString + 'Z';
+                    const date = new Date(utcDateString);
+                    
+                    const now = new Date();
+                    const diffMs = now.getTime() - date.getTime();
+                    const diffMins = Math.floor(diffMs / (1000 * 60));
+                    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                    
+                    if (diffMins < 1) {
+                      return "gerade eben";
+                    } else if (diffMins < 60) {
+                      return `vor ${diffMins} Min.`;
+                    } else if (diffHours < 24) {
+                      return `vor ${diffHours} Std.`;
+                    } else if (diffDays === 1) {
+                      return "gestern";
+                    } else if (diffDays < 7) {
+                      return `vor ${diffDays} Tagen`;
+                    } else {
+                      return date.toLocaleDateString("de-DE", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      });
+                    }
+                  };
+
+                  switch (reason) {
+                    case "todo_completed":
+                      return {
+                        icon: <Target size={20} color="#3b82f6" />,
+                        title: "Todo abgeschlossen",
+                        subtitle: formatDate(pointEntry.created_at || new Date().toISOString()),
+                      };
+                    case "skill_completed":
+                      return {
+                        icon: <Award size={20} color="#10b981" />,
+                        title: "Skill abgeschlossen",
+                        subtitle: formatDate(pointEntry.created_at || new Date().toISOString()),
+                      };
+                    case "daily_login":
+                      return {
+                        icon: <Flame size={20} color="#ef4444" />,
+                        title: "Tägliche Anmeldung",
+                        subtitle: formatDate(pointEntry.created_at || new Date().toISOString()),
+                      };
+                    case "streak_bonus":
+                      return {
+                        icon: <Flame size={20} color="#ef4444" />,
+                        title: "Streak Bonus",
+                        subtitle: formatDate(pointEntry.created_at || new Date().toISOString()),
+                      };
+                    default:
+                      return {
+                        icon: <Award size={20} color="#10b981" />,
+                        title: "Punkte erhalten",
+                        subtitle: formatDate(pointEntry.created_at || new Date().toISOString()),
+                      };
+                  }
+                };
+
+                const activityInfo = getActivityInfo(pointEntry.reason);
+
+                return (
+                  <ActivityItem
+                    key={pointEntry.id}
+                    icon={activityInfo.icon}
+                    title={activityInfo.title}
+                    subtitle={activityInfo.subtitle}
+                    points={pointEntry.points}
+                  />
+                );
+              })
+            ) : (
+              <Text style={{ color: Colors[colorScheme].text }}>
+                Noch keine Aktivitäten vorhanden.
+              </Text>
+            )}
           </View>
         </View>
 

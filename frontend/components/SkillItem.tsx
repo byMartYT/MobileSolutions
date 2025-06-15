@@ -19,7 +19,7 @@ type SkillItemProps = {
 
 const SkillItem = (data: SkillItemProps) => {
   const { updateSkill } = useStore();
-  const { awardPoints } = useGamification();
+  const { completeTask } = useGamification();
   const [nextTodo, setNextTodo] = useState<TodoItem[]>(
     data.todos.filter((todo) => !todo.status)
   );
@@ -49,12 +49,12 @@ const SkillItem = (data: SkillItemProps) => {
 
     // Gamification Integration
     if (newStatus && data.id) {
-      // Award points for completing a todo
-      await awardPoints("todo_completed", 10, nextTodo[0].id);
+      // Complete todo task
+      await completeTask("todo", nextTodo[0].id);
 
       // Check if skill is completed and award bonus points
       if (count + 1 === total) {
-        await awardPoints("skill_completed", 25, data.id);
+        await completeTask("skill", data.id);
         data.completeConfetti();
       } else {
         data.handleConfetti();

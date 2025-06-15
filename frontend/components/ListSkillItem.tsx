@@ -5,6 +5,7 @@ import ListSkillItemHeader from "./ListSkillItemHeader";
 import NextTodo from "./NextTodo";
 import { api } from "@/api/api";
 import useStore from "@/store/store";
+import { useGamification } from "@/store/gamificationStore";
 
 type Props = Todo & {
   handleConfetti: () => void;
@@ -12,6 +13,8 @@ type Props = Todo & {
 
 const ListSkillItem = (data: Props) => {
   const { updateSkill } = useStore();
+
+  const { completeTask, awardPoints, stats, fetchData } = useGamification();
 
   const updateTodoStatus = async (
     newStatus: boolean,
@@ -28,11 +31,31 @@ const ListSkillItem = (data: Props) => {
       status: newStatus,
       text: foundTodo.text || "", // Ensure text is never undefined
     };
-    updateSkill({
+
+    // Update the local state
+    const updatedSkill = {
       ...data,
       todos: data.todos.map((todo) => (todo.id === id ? updatedTodo : todo)),
-    });
-    if (newStatus) {
+    };
+    updateSkill(updatedSkill);
+
+    // Gamification Integration
+    if (newStatus && data.id) {
+      // Complete todo task
+      await completeTask("todo", id);
+
+      // Check if skill is completed (all todos done)
+      const completedTodos = updatedSkill.todos.filter(
+        (todo) => todo.status
+      ).length;
+      const totalTodos = updatedSkill.todos.length;
+
+      if (completedTodos === totalTodos && totalTodos > 0) {
+        // Skill completed - award bonus points
+        await completeTask("skill", data.id);
+        console.log("🎯 SKILL COMPLETED:", data.title);
+      }
+
       data.handleConfetti();
     }
   };
