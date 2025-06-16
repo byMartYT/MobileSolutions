@@ -84,3 +84,16 @@ async def collect_with_session(request: SkillCollectionSession):
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in session collection: {str(e)}")
+
+
+@router.post("/generate-skill", response_model=Dict)
+async def generate_skill_plan(request: Dict):
+    """
+    Generiert einen SkillItem-Plan aus vollständigen Collector-Daten
+    """
+    try:
+        from ai.generator import generate_skill_plan
+        response = generate_skill_plan(request)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating skill plan: {str(e)}")
