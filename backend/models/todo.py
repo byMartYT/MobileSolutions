@@ -29,7 +29,7 @@ class Todo(BaseModel):
     id: Optional[str] = Field(None, description="MongoDB object ID")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "title": "Fitness Goals",
                 "user": "martin",

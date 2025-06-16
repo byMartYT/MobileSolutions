@@ -53,7 +53,6 @@ const ListSkillItem = (data: Props) => {
       if (completedTodos === totalTodos && totalTodos > 0) {
         // Skill completed - award bonus points
         await completeTask("skill", data.id);
-        console.log("🎯 SKILL COMPLETED:", data.title);
       }
 
       data.handleConfetti();

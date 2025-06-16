@@ -8,6 +8,7 @@ import ConversationProgress from "./ConversationProgress";
 import Container from "@/components/Container";
 import { api } from "@/api/api";
 import useStore from "@/store/store";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AISkillGenerator() {
   const {
@@ -239,61 +240,63 @@ export default function AISkillGenerator() {
 
   // Show conversation interface
   return (
-    <View className="flex-1 bg-gray-50">
-      {conversation && (
-        <ConversationProgress
-          currentState={conversation.state}
-          progressPercentage={conversation.progressPercentage}
-        />
-      )}
-
-      {error && (
-        <View className="bg-red-50 border-b border-red-200 px-4 py-3">
-          <Text className="text-red-800 text-sm">Fehler: {error}</Text>
-        </View>
-      )}
-
-      <View className="flex-1">
+    <SafeAreaView edges={["top"]} className="flex-1">
+      <View className="flex-1 bg-gray-50">
         {conversation && (
-          <ChatInterface
-            messages={conversation.messages}
-            onSendMessage={handleSendMessage}
-            isLoading={isLoading}
-            disabled={conversation.isComplete}
+          <ConversationProgress
+            currentState={conversation.state}
+            progressPercentage={conversation.progressPercentage}
           />
         )}
+
+        {error && (
+          <View className="bg-red-50 border-b border-red-200 px-4 py-3">
+            <Text className="text-red-800 text-sm">Fehler: {error}</Text>
+          </View>
+        )}
+
+        <View className="flex-1">
+          {conversation && (
+            <ChatInterface
+              messages={conversation.messages}
+              onSendMessage={handleSendMessage}
+              isLoading={isLoading}
+              disabled={conversation.isComplete}
+            />
+          )}
+        </View>
+
+        {conversation?.isComplete && !generatedSkill && (
+          <View className="bg-white border-t border-gray-200 px-4 py-4">
+            <Pressable
+              onPress={handleGenerateSkill}
+              disabled={isGenerating}
+              className={`rounded-xl px-6 py-4 items-center ${
+                isGenerating ? "bg-gray-300" : "bg-blue-500"
+              }`}
+            >
+              <View className="flex-row items-center">
+                <Sparkles size={20} color="white" />
+                <Text className="text-white font-semibold text-lg ml-2">
+                  {isGenerating ? "Erstelle Skill..." : "Skill generieren"}
+                </Text>
+              </View>
+            </Pressable>
+          </View>
+        )}
+
+        {/* Restart Button */}
+        {conversation && !conversation.isComplete && (
+          <View className="absolute top-4 right-4">
+            <Pressable
+              onPress={handleRestart}
+              className="bg-gray-200 rounded-full p-2"
+            >
+              <RotateCcw size={18} color="#6B7280" />
+            </Pressable>
+          </View>
+        )}
       </View>
-
-      {conversation?.isComplete && !generatedSkill && (
-        <View className="bg-white border-t border-gray-200 px-4 py-4">
-          <Pressable
-            onPress={handleGenerateSkill}
-            disabled={isGenerating}
-            className={`rounded-xl px-6 py-4 items-center ${
-              isGenerating ? "bg-gray-300" : "bg-blue-500"
-            }`}
-          >
-            <View className="flex-row items-center">
-              <Sparkles size={20} color="white" />
-              <Text className="text-white font-semibold text-lg ml-2">
-                {isGenerating ? "Erstelle Skill..." : "Skill generieren"}
-              </Text>
-            </View>
-          </Pressable>
-        </View>
-      )}
-
-      {/* Restart Button */}
-      {conversation && !conversation.isComplete && (
-        <View className="absolute top-4 right-4">
-          <Pressable
-            onPress={handleRestart}
-            className="bg-gray-200 rounded-full p-2"
-          >
-            <RotateCcw size={18} color="#6B7280" />
-          </Pressable>
-        </View>
-      )}
-    </View>
+    </SafeAreaView>
   );
 }

@@ -39,7 +39,7 @@ try {
 
 // API Configuration
 const apiConfig = new Configuration({
-  basePath: process.env.EXPO_PUBLIC_API_URL || "http://192.168.178.118:8000",
+  basePath: process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000",
 });
 
 const gamificationApi = new GamificationApi(apiConfig);
@@ -110,7 +110,6 @@ export const useGamificationStore = create<GamificationState>()(
       // Methods
       fetchData: async () => {
         const userId = DEFAULT_USER_ID;
-        console.log("🎮 fetchData: Starting to fetch data for user:", userId);
         set({ isLoading: true });
 
         try {
@@ -119,28 +118,12 @@ export const useGamificationStore = create<GamificationState>()(
             get().fetchAchievements(userId),
           ]);
 
-          console.log(
-            "🎮 fetchData: Received data - Points:",
-            summary.stats.total_points,
-            "Todos:",
-            summary.stats.total_todos_completed,
-            "Skills:",
-            summary.stats.total_skills_completed
-          );
-
           set({
             stats: summary.stats,
             achievements: achievements || [],
             recentPoints: summary.recent_points || [],
             lastSyncTime: new Date().toISOString(),
           });
-
-          console.log("🎮 fetchData: Store updated successfully");
-        } catch (error) {
-          console.error(
-            "🎮 fetchData: Failed to fetch gamification data:",
-            error
-          );
         } finally {
           set({ isLoading: false });
         }
@@ -154,7 +137,6 @@ export const useGamificationStore = create<GamificationState>()(
             );
           return response.data;
         } catch (error) {
-          console.error("Failed to fetch stats:", error);
           // Return default stats on error
           return {
             user_id: userId,
@@ -400,14 +382,6 @@ export const useGamificationStore = create<GamificationState>()(
 // Hook with computed values
 export const useGamification = () => {
   const store = useGamificationStore();
-
-  // Log the current stats for debugging
-  console.log("🎮 useGamification: Hook called with stats:", {
-    total_points: store.stats?.total_points,
-    total_todos_completed: store.stats?.total_todos_completed,
-    total_skills_completed: store.stats?.total_skills_completed,
-    lastSyncTime: store.lastSyncTime,
-  });
 
   return {
     ...store,

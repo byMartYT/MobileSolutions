@@ -48,7 +48,7 @@ class UserStats(BaseModel):
     id: Optional[str] = Field(None, description="MongoDB object ID")
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "user_id": "martin",
                 "total_points": 1250,
@@ -81,7 +81,7 @@ class Achievement(BaseModel):
     id: Optional[str] = Field(None, description="MongoDB object ID")
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "name": "First Steps",
                 "description": "Complete your first todo item",
@@ -108,7 +108,7 @@ class UserAchievement(BaseModel):
     id: Optional[str] = Field(None, description="MongoDB object ID")
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "user_id": "martin",
                 "achievement_id": "first_steps_achievement",
@@ -133,7 +133,7 @@ class PointsEntry(BaseModel):
     id: Optional[str] = Field(None, description="MongoDB object ID")
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "user_id": "martin",
                 "points": 25,
@@ -159,7 +159,7 @@ class LevelConfig(BaseModel):
     id: Optional[str] = Field(None, description="MongoDB object ID")
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "level": 5,
                 "points_required": 1000,

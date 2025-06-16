@@ -45,8 +45,6 @@ export default function Index() {
         return;
       }
 
-      console.log("🎯 Daily Login Check started for user:", stats.user_id);
-
       if (stats?.last_active_date) {
         const today = new Date();
         const lastActive = new Date(stats.last_active_date);
@@ -55,34 +53,20 @@ export default function Index() {
         const todayDateString = today.toDateString();
         const lastActiveDateString = lastActive.toDateString();
 
-        console.log("🎯 Daily Login Check:", {
-          today: todayDateString,
-          lastActive: lastActiveDateString,
-          isDifferentDay: todayDateString !== lastActiveDateString,
-          lastActiveIso: stats.last_active_date,
-        });
-
         // Award daily login bonus only if it's actually a new day
         if (todayDateString !== lastActiveDateString) {
-          console.log("🎯 EXECUTING daily login bonus - new day detected");
-
           try {
             // Award daily login points (this now automatically updates streak in backend)
             await awardPoints("daily_login");
-            console.log("🎯 Daily login bonus completed successfully");
           } catch (error) {
             console.error("🎯 Daily login bonus failed:", error);
           }
         } else {
-          console.log("🎯 No daily login bonus - same day");
         }
       } else {
-        console.log("🎯 EXECUTING first time login - awarding bonus");
-
         try {
           // First time login (this now automatically updates streak in backend)
           await awardPoints("daily_login");
-          console.log("🎯 First time login bonus completed successfully");
         } catch (error) {
           console.error("🎯 First time login bonus failed:", error);
         }

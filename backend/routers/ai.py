@@ -1,169 +1,86 @@
 from fastapi import APIRouter, HTTPException
-from datetime import datetime
-from models.ai_models import (
-    MessageRequest, 
-    ConversationResponse, 
-    SkillGenerationRequest,
-    SkillGenerationResponse,
-    ConversationState,
-    Message
-)
-from ai.agent import skill_agent
-from ai.conversation import conversation_manager
+from pydantic import BaseModel, Field
+from typing import Optional, Dict, List
+from ai.collector import start_skill_collection, continue_skill_collection, CollectorResponse, SkillData
+
+
+class ChatMessage(BaseModel):
+    message: str = Field(..., description="User message for skill information collection")
+
+
+class ContinueCollectionRequest(BaseModel):
+    current_data: Dict = Field(..., description="Currently collected skill data")
+    message: str = Field(..., description="New user message")
+
+
+class SkillCollectionSession(BaseModel):
+    session_id: Optional[str] = Field(None, description="Session ID für Konversations-Tracking")
+    current_data: Optional[Dict] = Field(None, description="Aktuelle Skill-Daten")
+    message: str = Field(..., description="User message")
+
 
 router = APIRouter()
 
-@router.post("/start-conversation", response_model=ConversationResponse)
-async def start_conversation():
-    """Start a new AI skill generation conversation"""
+
+@router.post("/collect-start", response_model=Dict)
+async def start_collection(request: ChatMessage):
+    """
+    Startet den Informationssammlungsprozess für Skill-Entwicklung
+    """
     try:
-        # Create new conversation
-        conversation = conversation_manager.create_conversation()
-        
-        # Generate initial greeting
-        initial_message = """Hallo! 👋 Ich bin dein AI Skill-Generator! 
-
-Ich helfe dir dabei, einen personalisierten Lernplan zu erstellen. Lass uns gemeinsam herausfinden, welchen Skill du lernen möchtest und wie wir das am besten angehen.
-
-Welchen Skill möchtest du gerne lernen? Das kann alles sein - von Musik über Sport bis hin zu beruflichen Fähigkeiten! 🚀"""
-        
-        # Add initial message to conversation
-        ai_msg = Message(
-            role="assistant",
-            content=initial_message,
-            timestamp=datetime.now()
-        )
-        conversation_manager.add_message(conversation.id, ai_msg)
-        
-        return ConversationResponse(
-            conversation_id=conversation.id,
-            message=initial_message,
-            state=conversation.state,
-            is_complete=False,
-            progress_percentage=conversation_manager.get_progress_percentage(conversation.state)
-        )
-        
+        response = start_skill_collection(request.message)
+        return response
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to start conversation: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error starting collection: {str(e)}")
 
-@router.post("/send-message", response_model=ConversationResponse)
-async def send_message(request: MessageRequest):
-    """Send a message in the conversation"""
+
+@router.post("/collect-continue", response_model=Dict)
+async def continue_collection(request: ContinueCollectionRequest):
+    """
+    Setzt den Informationssammlungsprozess mit bereits vorhandenen Daten fort
+    """
     try:
-        # Get conversation
-        conversation = conversation_manager.get_conversation(request.conversation_id)
-        if not conversation:
-            raise HTTPException(status_code=404, detail="Conversation not found")
-        
-        if conversation.is_complete:
-            raise HTTPException(status_code=400, detail="Conversation is already complete")
-        
-        # Process message with AI agent
-        ai_response, should_advance = skill_agent.process_message(
-            request.conversation_id, 
-            request.message
-        )
-        
-        # Advance state if needed
-        if should_advance:
-            conversation_manager.advance_state(request.conversation_id)
-            conversation = conversation_manager.get_conversation(request.conversation_id)
-        
-        # Check if ready for generation
-        next_question = None
-        if conversation_manager.is_ready_for_generation(request.conversation_id):
-            if conversation.state == "collecting_preferences":
-                # This was the last question, mark as ready for generation
-                conversation_manager.advance_state(request.conversation_id)
-                conversation = conversation_manager.get_conversation(request.conversation_id)
-        
-        return ConversationResponse(
-            conversation_id=conversation.id,
-            message=ai_response,
-            state=conversation.state,
-            is_complete=conversation.is_complete,
-            next_question=next_question,
-            progress_percentage=conversation_manager.get_progress_percentage(conversation.state)
-        )
-        
-    except HTTPException:
-        raise
+        response = continue_skill_collection(request.current_data, request.message)
+        return response
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to process message: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error continuing collection: {str(e)}")
 
-@router.post("/generate-skill", response_model=SkillGenerationResponse)
-async def generate_skill(request: SkillGenerationRequest):
-    """Generate the final skill based on conversation"""
+
+@router.post("/collect", response_model=Dict)
+async def collect_skill_info(request: ChatMessage):
+    """
+    Universelle Route für Informationssammlung - startet automatisch oder setzt fort
+    Basiert auf dem Kontext in der Nachricht
+    """
     try:
-        # Check if conversation exists and is ready
-        conversation = conversation_manager.get_conversation(request.conversation_id)
-        if not conversation:
-            raise HTTPException(status_code=404, detail="Conversation not found")
+        # Für Einfachheit starten wir immer neu - in einer echten App würden Sie 
+        # Session-Management implementieren
+        response = start_skill_collection(request.message)
         
-        if not conversation_manager.is_ready_for_generation(request.conversation_id):
-            raise HTTPException(status_code=400, detail="Conversation is not ready for skill generation")
-        
-        # Generate skill
-        generated_skill = skill_agent.generate_skill(request.conversation_id)
-        if not generated_skill:
-            raise HTTPException(status_code=500, detail="Failed to generate skill")
-        
-        # Mark conversation as complete
-        conversation_manager.update_conversation(
-            request.conversation_id,
-            state="complete",
-            is_complete=True
-        )
-        
-        return SkillGenerationResponse(
-            success=True,
-            skill=generated_skill,
-            error=None
-        )
-        
-    except HTTPException:
-        raise
+        return response
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate skill: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error collecting information: {str(e)}")
 
-@router.get("/conversation/{conversation_id}", response_model=ConversationState)
-async def get_conversation(conversation_id: str):
-    """Get conversation state"""
+
+@router.post("/collect-session", response_model=Dict)
+async def collect_with_session(request: SkillCollectionSession):
+    """
+    Intelligente Informationssammlung mit Session-Support
+    - Erkennt automatisch ob neue Session oder Fortsetzung
+    - Verwaltet den Sammlungsfortschritt
+    """
     try:
-        conversation = conversation_manager.get_conversation(conversation_id)
-        if not conversation:
-            raise HTTPException(status_code=404, detail="Conversation not found")
+        if request.current_data and any(request.current_data.values()):
+            # Fortsetzung einer bestehenden Session
+            response = continue_skill_collection(request.current_data, request.message)
+        else:
+            # Neue Session starten
+            response = start_skill_collection(request.message)
         
-        return conversation
+        # Füge Session-Tracking hinzu
+        if request.session_id:
+            response["session_id"] = request.session_id
         
-    except HTTPException:
-        raise
+        return response
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get conversation: {str(e)}")
-
-@router.delete("/conversation/{conversation_id}")
-async def delete_conversation(conversation_id: str):
-    """Delete a conversation"""
-    try:
-        conversation = conversation_manager.get_conversation(conversation_id)
-        if not conversation:
-            raise HTTPException(status_code=404, detail="Conversation not found")
-        
-        # Remove from manager
-        del conversation_manager.conversations[conversation_id]
-        
-        return {"message": "Conversation deleted successfully"}
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to delete conversation: {str(e)}")
-
-@router.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "service": "AI Skill Generator",
-        "active_conversations": len(conversation_manager.conversations)
-    }
+        raise HTTPException(status_code=500, detail=f"Error in session collection: {str(e)}")
