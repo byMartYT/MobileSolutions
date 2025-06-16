@@ -72,6 +72,8 @@ export default function AIScreen() {
         );
       }
 
+      console.log(response);
+
       // Update current data
       setCurrentCollectorData(response.current_data);
 
@@ -86,16 +88,40 @@ export default function AIScreen() {
 
       setMessages((prev) => [...prev, aiMessage]);
 
-      // If collection is complete, show completion message
+      // If collection is complete, automatically generate skill plan
       if (response.status === "complete") {
-        setTimeout(() => {
+        setTimeout(async () => {
           const completionMessage: Message = {
             id: (Date.now() + 2).toString(),
-            text: "Perfekt! Ich habe alle Informationen gesammelt. Möchtest du jetzt einen personalisierten Lernplan erstellen?",
+            text: "Perfekt! Ich habe alle Informationen gesammelt. Ich erstelle jetzt deinen personalisierten Lernplan...",
             isUser: false,
             timestamp: new Date(),
           };
           setMessages((prev) => [...prev, completionMessage]);
+
+          // Automatically generate skill plan
+          try {
+            const skillPlan = await AISkillAPI.generateSkillPlan(response);
+
+            console.log(skillPlan);
+
+            const planMessage: Message = {
+              id: (Date.now() + 3).toString(),
+              text: `🎉 Dein personalisierter Lernplan für "${skillPlan.title}" wurde erstellt!\n\n🎯 Ziel: ${skillPlan.goal}\n\n💡 Tipp: ${skillPlan.tip}\n\nDein Plan wurde zu deiner Skill-Liste hinzugefügt!`,
+              isUser: false,
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, planMessage]);
+          } catch (error) {
+            console.error("Error auto-generating skill plan:", error);
+            const errorMessage: Message = {
+              id: (Date.now() + 3).toString(),
+              text: "Es gab einen Fehler beim Erstellen des Lernplans. Du kannst es später nochmal versuchen.",
+              isUser: false,
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, errorMessage]);
+          }
         }, 1000);
       }
     } catch (error) {
@@ -191,7 +217,9 @@ export default function AIScreen() {
         <View
           className={`max-w-[80%] px-4 py-3 rounded-2xl`}
           style={{
-            backgroundColor: message.isUser ? "#007AFF" : colors.onSurface,
+            backgroundColor: message.isUser
+              ? colors.tintDark
+              : colors.onSurface,
           }}
         >
           <Text

@@ -21,10 +21,11 @@ import AddChooseModal from "@/components/AddChooseModal";
 
 export default function Index() {
   const { skills, removeSkill, setSkills } = useStore();
-  const { completeTask, awardPoints, stats, fetchData, updateUserStats } =
+  const { completeTask, dailyLogin, stats, fetchData, updateUserStats } =
     useGamification();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [dailyLoginChecked, setDailyLoginChecked] = useState(false);
 
   const slideAnim = useRef(
     new Animated.Value(Dimensions.get("window").height)
@@ -38,46 +39,50 @@ export default function Index() {
     fetchData();
   }, []);
 
-  // Check for daily login bonus - runs when stats change
+  // Check for daily login bonus - runs only once when component mounts
   useEffect(() => {
     const checkDailyLogin = async () => {
-      if (!stats?.user_id) {
+      if (!stats?.user_id || dailyLoginChecked) {
         return;
       }
 
-      if (stats?.last_active_date) {
-        const today = new Date();
-        const lastActive = new Date(stats.last_active_date);
+      // Check if we already checked today (additional safety measure)
+      const today = new Date().toDateString();
+      const lastDailyCheck =
+        localStorage?.getItem?.("lastDailyLoginCheck") ||
+        (globalThis as any).__lastDailyLoginCheck;
 
-        // Check if it's actually a different day (not just a different time)
-        const todayDateString = today.toDateString();
-        const lastActiveDateString = lastActive.toDateString();
+      if (lastDailyCheck === today) {
+        console.log("🎯 Daily login already checked today via cache");
+        setDailyLoginChecked(true);
+        return;
+      }
 
-        // Award daily login bonus only if it's actually a new day
-        if (todayDateString !== lastActiveDateString) {
-          try {
-            // Award daily login points (this now automatically updates streak in backend)
-            await awardPoints("daily_login");
-          } catch (error) {
-            console.error("🎯 Daily login bonus failed:", error);
-          }
+      console.log("🎯 Checking daily login...");
+
+      try {
+        const result = await dailyLogin();
+
+        // Store that we checked today
+        if (localStorage?.setItem) {
+          localStorage.setItem("lastDailyLoginCheck", today);
         } else {
+          (globalThis as any).__lastDailyLoginCheck = today;
         }
-      } else {
-        try {
-          // First time login (this now automatically updates streak in backend)
-          await awardPoints("daily_login");
-        } catch (error) {
-          console.error("🎯 First time login bonus failed:", error);
-        }
+
+        setDailyLoginChecked(true);
+        console.log("🎯 Daily login check completed:", result);
+      } catch (error) {
+        console.error("🎯 Daily login check failed:", error);
+        setDailyLoginChecked(true); // Still mark as checked to avoid infinite retries
       }
     };
 
-    // Only run if we have stats and they contain an actual last_active_date
-    if (stats?.user_id && stats?.last_active_date !== undefined) {
+    // Only check daily login once after stats are loaded
+    if (stats?.user_id && !dailyLoginChecked) {
       checkDailyLogin();
     }
-  }, [stats?.last_active_date]); // Trigger when last_active_date changes
+  }, [stats?.user_id, dailyLoginChecked]); // Only trigger when user_id is available and check hasn't been done
 
   const handleConfetti = () => {
     if (confettiRef.current) {

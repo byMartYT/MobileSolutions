@@ -4,7 +4,7 @@ from typing import List, Optional
 from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
 from bson import ObjectId
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta, timedelta
 import asyncio
 
 from database import get_database
@@ -276,23 +276,28 @@ async def update_user_stats(user_id: str, update: UserStatsUpdate, db: Database 
         user_stats.total_skills_completed += update.skills_completed
     
     if update.update_streak is not None and update.update_streak:
-        # Update streak logic
+        # Update streak logic using UTC consistently
+        now_utc = datetime.now(timezone.utc)
+        
         try:
-            last_active = datetime.fromisoformat(user_stats.last_active_date.replace('Z', '+00:00'))
+            # Parse stored date as UTC
+            if user_stats.last_active_date.endswith('Z'):
+                last_active_utc = datetime.fromisoformat(user_stats.last_active_date.replace('Z', '+00:00'))
+            else:
+                # Assume UTC if no timezone info
+                last_active_utc = datetime.fromisoformat(user_stats.last_active_date).replace(tzinfo=timezone.utc)
         except:
             # If parsing fails, treat as first time
-            last_active = datetime.min
+            last_active_utc = datetime.min.replace(tzinfo=timezone.utc)
             
-        today = datetime.now()
-        
         # Special case: if streak is 0 or it's the first activity, always start at 1
         if user_stats.streak_count == 0:
             user_stats.streak_count = 1
             user_stats.longest_streak = max(user_stats.longest_streak, 1)
         else:
-            # Check if it's a new day
-            if last_active.date() < today.date():
-                days_diff = (today.date() - last_active.date()).days
+            # Check if it's a new UTC day
+            if last_active_utc.date() < now_utc.date():
+                days_diff = (now_utc.date() - last_active_utc.date()).days
                 
                 if days_diff == 1:
                     # Consecutive day - increment streak
@@ -305,10 +310,13 @@ async def update_user_stats(user_id: str, update: UserStatsUpdate, db: Database 
                 # Update longest streak
                 if user_stats.streak_count > user_stats.longest_streak:
                     user_stats.longest_streak = user_stats.streak_count
-    
-    # Update timestamps
-    user_stats.last_active_date = datetime.now().isoformat()
-    user_stats.updated_at = datetime.now().isoformat()
+        
+        # Update timestamps with UTC
+        user_stats.last_active_date = now_utc.isoformat()
+        user_stats.updated_at = now_utc.isoformat()
+    else:
+        # Update only the updated_at timestamp for non-streak updates
+        user_stats.updated_at = datetime.now(timezone.utc).isoformat()
     
     # Save to database
     stats_collection = db.get_collection("user_stats")
@@ -490,22 +498,36 @@ async def daily_login(user_id: str, db: Database = Depends(get_database)):
     """Handle daily login - award points and update streak in one operation."""
     user_stats = await get_or_create_user_stats(db, user_id)
     
-    # Check if daily login already happened today
-    try:
-        last_active = datetime.fromisoformat(user_stats.last_active_date.replace('Z', '+00:00'))
-    except:
-        last_active = datetime.min
-        
-    today = datetime.now()
+    # Work in Central European Time (CET/CEST) for day comparison
+    # Germany is UTC+1 in winter, UTC+2 in summer
+    cet_timezone = timezone(timedelta(hours=2))  # Summer time (CEST)
+    now_cet = datetime.now(cet_timezone)
     
-    # Check if it's a new day
-    if last_active.date() < today.date() or user_stats.streak_count == 0:
+    # Check if daily login already happened today  
+    try:
+        # Parse stored date as UTC and convert to CET
+        if user_stats.last_active_date.endswith('Z'):
+            last_active_utc = datetime.fromisoformat(user_stats.last_active_date.replace('Z', '+00:00'))
+        else:
+            # Assume UTC if no timezone info
+            last_active_utc = datetime.fromisoformat(user_stats.last_active_date).replace(tzinfo=timezone.utc)
+        
+        # Convert to CET for day comparison
+        last_active_cet = last_active_utc.astimezone(cet_timezone)
+    except:
+        last_active_cet = datetime.min.replace(tzinfo=cet_timezone)
+    
+    print(f"Debug: last_active_cet={last_active_cet}, now_cet={now_cet}")
+    print(f"Debug: last_active date={last_active_cet.date()}, today date={now_cet.date()}")
+    
+    # Check if it's a new CET day
+    if last_active_cet.date() < now_cet.date() or user_stats.streak_count == 0:
         # Award daily login points
         points_entry = PointsEntry(
             user_id=user_id,
             points=10,
             reason=PointsReason.DAILY_LOGIN,
-            reference_id=f"daily_login_{today.date()}"
+            reference_id=f"daily_login_{now_cet.date()}"
         )
         
         # Save to points history
@@ -514,13 +536,13 @@ async def daily_login(user_id: str, db: Database = Depends(get_database)):
         # Update user stats with both points and streak
         user_stats.total_points += 10
         
-        # Update streak logic (same as before)
+        # Update streak logic
         if user_stats.streak_count == 0:
             user_stats.streak_count = 1
             user_stats.longest_streak = max(user_stats.longest_streak, 1)
         else:
-            if last_active.date() < today.date():
-                days_diff = (today.date() - last_active.date()).days
+            if last_active_cet.date() < now_cet.date():
+                days_diff = (now_cet.date() - last_active_cet.date()).days
                 
                 if days_diff == 1:
                     # Consecutive day - increment streak
@@ -533,9 +555,10 @@ async def daily_login(user_id: str, db: Database = Depends(get_database)):
                 if user_stats.streak_count > user_stats.longest_streak:
                     user_stats.longest_streak = user_stats.streak_count
         
-        # Update timestamps
-        user_stats.last_active_date = today.isoformat()
-        user_stats.updated_at = today.isoformat()
+        # Update timestamps (store as UTC)
+        now_utc = datetime.now(timezone.utc)
+        user_stats.last_active_date = now_utc.isoformat()
+        user_stats.updated_at = now_utc.isoformat()
         
         # Save to database
         stats_collection = db.get_collection("user_stats")

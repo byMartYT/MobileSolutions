@@ -109,6 +109,30 @@ def collect_information(input) -> Dict:
     print(f"Error parsing response: {e}")
     print(f"LLM response: {llm_res.content}")
     
+    # Check if all required fields are present in input for manual override
+    has_all_fields = all([
+      input.get('skill', '').strip(),
+      input.get('goal', '').strip(), 
+      input.get('experience', '').strip(),
+      input.get('deadline', '').strip()
+    ])
+    
+    if has_all_fields:
+      # If we have all fields but parsing failed, return complete status manually
+      return {
+        "status": "complete",
+        "current_data": {
+          "skill": input.get('skill'),
+          "goal": input.get('goal'),
+          "experience": input.get('experience'),
+          "deadline": input.get('deadline')
+        },
+        "missing_fields": [],
+        "next_question": None,
+        "error": str(e),
+        "raw_response": llm_res.content
+      }
+    
     # Fallback: try to extract information manually
     return {
       "status": "collecting",

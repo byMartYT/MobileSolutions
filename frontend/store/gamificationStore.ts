@@ -81,6 +81,7 @@ interface GamificationState {
     points?: number,
     referenceId?: string
   ) => Promise<void>;
+  dailyLogin: (userId?: string) => Promise<any>;
   updateUserStats: (update: UserStatsUpdate) => Promise<void>;
   completeTask: (
     taskType: "todo" | "skill",
@@ -200,6 +201,38 @@ export const useGamificationStore = create<GamificationState>()(
           console.error("Failed to fetch levels:", error);
           // Return default levels on error
           return [];
+        }
+      },
+
+      dailyLogin: async (userId = DEFAULT_USER_ID) => {
+        try {
+          console.log("🎯 Calling daily login API...");
+          const response =
+            await gamificationApi.dailyLoginApiV1GamificationDailyLoginUserIdPost(
+              userId
+            );
+
+          console.log("🎯 Daily login response:", response.data);
+
+          // Add pending reward if points were awarded
+          if (response.data.points_awarded > 0) {
+            get()._addPendingReward({
+              id: `reward_${Date.now()}`,
+              type: "points",
+              points: response.data.points_awarded,
+              timestamp: new Date().toISOString(),
+            });
+
+            // Only refresh data if points were actually awarded to avoid unnecessary requests
+            await get().fetchData();
+          } else {
+            console.log("🎯 Daily login already completed today");
+          }
+
+          return response.data;
+        } catch (error) {
+          console.error("Failed to process daily login:", error);
+          throw error;
         }
       },
 

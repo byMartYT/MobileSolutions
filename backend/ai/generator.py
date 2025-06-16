@@ -4,7 +4,7 @@ from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Dict
 from dotenv import load_dotenv
-from prompts import GENERATOR_PROMPT
+from ai.prompts import GENERATOR_PROMPT
 import os
 load_dotenv()
 

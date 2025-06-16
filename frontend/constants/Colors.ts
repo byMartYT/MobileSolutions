@@ -1,5 +1,3 @@
-import { LinearGradient } from "expo-linear-gradient";
-
 const tintColorLight = "#C0B0FF";
 const tintColorDark = "#4D3D90";
 

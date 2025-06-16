@@ -80,7 +80,9 @@ async def collect_with_session(request: SkillCollectionSession):
         # Füge Session-Tracking hinzu
         if request.session_id:
             response["session_id"] = request.session_id
-        
+
+        print(f"Session response: {response}")
+
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in session collection: {str(e)}")
@@ -92,8 +94,8 @@ async def generate_skill_plan(request: Dict):
     Generiert einen SkillItem-Plan aus vollständigen Collector-Daten
     """
     try:
-        from ai.generator import generate_skill_plan
-        response = generate_skill_plan(request)
+        from ai.generator import generate_skill_plan as generator_function
+        response = generator_function(request)
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating skill plan: {str(e)}")
