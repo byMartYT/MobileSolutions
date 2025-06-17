@@ -198,8 +198,11 @@ export default function AIScreen() {
   };
 
   const WelcomeScreen = () => (
-    <View className="flex-1 items-start justify-between gap-1">
-      <View className="px-4">
+    <View
+      className="items-start justify-between gap-1"
+      style={{ minHeight: "100%" }}
+    >
+      <View className="px-4 pt-8">
         <Title className="">Hallo!</Title>
         <Text
           className="text-3xl font-semibold mb-8"
@@ -331,8 +334,11 @@ export default function AIScreen() {
         <ScrollView
           className="flex-1"
           contentContainerStyle={
-            messages.length === 0 ? { flex: 1 } : undefined
+            messages.length === 0
+              ? { flexGrow: 1, justifyContent: "space-between" }
+              : undefined
           }
+          showsVerticalScrollIndicator={false}
         >
           {messages.length === 0 ? (
             <WelcomeScreen />
