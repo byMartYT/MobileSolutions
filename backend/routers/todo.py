@@ -71,7 +71,7 @@ async def update_user_activity(db: Database, user_id: str):
 async def create_todo(todo: Todo, db: Database = Depends(get_database)):
     """Create a new todo list"""
     # Convert to dict for MongoDB
-    todo_dict = todo.dict(exclude={"id"})
+    todo_dict = todo.model_dump(exclude={"id"})
     
     # Insert into database
     result = await db.skills.insert_one(todo_dict)

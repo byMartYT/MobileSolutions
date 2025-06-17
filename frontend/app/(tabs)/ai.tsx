@@ -13,10 +13,14 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
-import { AISkillAPI, CollectorResponse } from "@/api/aiSkillAPI";
+import { AISkillAPI, CollectorResponse, SkillItem } from "@/api/aiSkillAPI";
 import Title from "@/components/Title";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { ArrowUp } from "lucide-react-native";
+import { ArrowUp, RotateCcw } from "lucide-react-native";
+import SkillPreview from "@/components/SkillPreview";
+import useStore from "@/store/store";
+import { Todo } from "@/generated";
+import { api } from "@/api/api";
 
 const EXAMPLE_PROMPTS = [
   "🏃🏻 Halbmarathon",
@@ -31,11 +35,13 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
   data?: CollectorResponse;
+  skillItem?: SkillItem;
 }
 
 export default function AIScreen() {
   const { colorScheme } = useAppTheme();
   const colors = Colors[colorScheme];
+  const { addSkill } = useStore();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
@@ -43,6 +49,43 @@ export default function AIScreen() {
   const [currentCollectorData, setCurrentCollectorData] = useState<
     CollectorResponse["current_data"]
   >({});
+
+  const addSkillToList = async (skillItem: SkillItem) => {
+    const todo: Todo = {
+      title: skillItem.title,
+      user: "user-123", // You might want to get this from user context
+      icon: skillItem.icon,
+      color: skillItem.color,
+      textColor: "#FFFFFF",
+      tip: skillItem.tip,
+      goal: skillItem.goal,
+      todos: skillItem.todos.map((todo, index) => ({
+        id: `${Date.now()}-${index}`,
+        text: todo.text,
+        status: todo.status,
+      })),
+      id: Date.now().toString(),
+    };
+
+    try {
+      // Send to backend first
+      const createdTodo = await api.createTodoApiV1TodosPost(todo);
+
+      // Add to local store only if backend call succeeds
+      addSkill(createdTodo.data);
+
+      Alert.alert(
+        "Erfolg",
+        `"${skillItem.title}" wurde zu deiner Skill-Liste hinzugefügt!`
+      );
+    } catch (error) {
+      console.error("Error adding skill to backend:", error);
+      Alert.alert(
+        "Fehler",
+        "Es gab einen Fehler beim Hinzufügen des Skills. Bitte versuche es erneut."
+      );
+    }
+  };
 
   const sendMessage = async (text: string) => {
     if (!text.trim()) return;
@@ -73,6 +116,7 @@ export default function AIScreen() {
       }
 
       console.log(response);
+      console.log("Status:", response.status);
 
       // Update current data
       setCurrentCollectorData(response.current_data);
@@ -90,6 +134,7 @@ export default function AIScreen() {
 
       // If collection is complete, automatically generate skill plan
       if (response.status === "complete") {
+        console.log("Status is complete, generating skill plan...");
         setTimeout(async () => {
           const completionMessage: Message = {
             id: (Date.now() + 2).toString(),
@@ -107,9 +152,10 @@ export default function AIScreen() {
 
             const planMessage: Message = {
               id: (Date.now() + 3).toString(),
-              text: `🎉 Dein personalisierter Lernplan für "${skillPlan.title}" wurde erstellt!\n\n🎯 Ziel: ${skillPlan.goal}\n\n💡 Tipp: ${skillPlan.tip}\n\nDein Plan wurde zu deiner Skill-Liste hinzugefügt!`,
+              text: `🎉 Dein personalisierter Lernplan für "${skillPlan.title}" wurde erstellt!\n\n🎯 Ziel: ${skillPlan.goal}\n\n💡 Tipp: ${skillPlan.tip}`,
               isUser: false,
               timestamp: new Date(),
+              skillItem: skillPlan,
             };
             setMessages((prev) => [...prev, planMessage]);
           } catch (error) {
@@ -144,30 +190,11 @@ export default function AIScreen() {
     }
   };
 
-  const generateSkillPlan = async () => {
-    const lastAiMessage = [...messages]
-      .reverse()
-      .find((m) => !m.isUser && m.data);
-    if (!lastAiMessage?.data) return;
-
-    setIsLoading(true);
-    try {
-      const skillPlan = await AISkillAPI.generateSkillPlan(lastAiMessage.data);
-
-      const planMessage: Message = {
-        id: Date.now().toString(),
-        text: `🎉 Dein personalisierter Lernplan für "${skillPlan.title}" wurde erstellt!\n\n🎯 Ziel: ${skillPlan.goal}\n\n💡 Tipp: ${skillPlan.tip}\n\nDein Plan wurde zu deiner Skill-Liste hinzugefügt!`,
-        isUser: false,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, planMessage]);
-    } catch (error) {
-      console.error("Error generating skill plan:", error);
-      Alert.alert("Fehler", "Es gab ein Problem beim Erstellen des Lernplans.");
-    } finally {
-      setIsLoading(false);
-    }
+  const resetChat = () => {
+    setMessages([]);
+    setCurrentCollectorData({});
+    setInputText("");
+    setIsLoading(false);
   };
 
   const WelcomeScreen = () => (
@@ -229,16 +256,39 @@ export default function AIScreen() {
             {message.text}
           </Text>
 
-          {isComplete && !message.isUser && (
-            <TouchableOpacity
-              onPress={generateSkillPlan}
-              className="mt-3 px-4 py-2 rounded-full"
-              style={{ backgroundColor: "#007AFF" }}
-            >
-              <Text className="text-white text-center font-semibold">
-                Lernplan erstellen 🚀
-              </Text>
-            </TouchableOpacity>
+          {/* Show SkillItem Preview if available */}
+          {message.skillItem && (
+            <View className="mt-3">
+              <SkillPreview
+                title={message.skillItem.title}
+                goal={message.skillItem.goal}
+                color={message.skillItem.color}
+                icon={message.skillItem.icon}
+                todos={message.skillItem.todos}
+              />
+              <Text style={{ marginTop: 20 }}>Schritte</Text>
+              <View className="gap-2" style={{ marginTop: 10 }}>
+                {message.skillItem.todos.length > 0 &&
+                  message.skillItem.todos.map((todo, ind) => (
+                    <View key={ind} className="bg-white p-4 rounded-lg">
+                      <Text>{todo.text}</Text>
+                    </View>
+                  ))}
+              </View>
+              <TouchableOpacity
+                onPress={() => addSkillToList(message.skillItem!)}
+                className="mt-3 rounded-full"
+                style={{
+                  backgroundColor: "#34C759",
+                  paddingVertical: 8,
+                  marginTop: 10,
+                }}
+              >
+                <Text className="text-white text-center font-semibold">
+                  Skill hinzufügen
+                </Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </View>
@@ -251,6 +301,28 @@ export default function AIScreen() {
       edges={["top"]}
       style={{ backgroundColor: colors.background }}
     >
+      {/* Header with Reset Button */}
+      {messages.length > 0 && (
+        <View
+          className="flex-row justify-between items-center px-4 py-3 border-b"
+          style={{ borderBottomColor: colors.tabIconDefault + "20" }}
+        >
+          <Text
+            className="text-xl font-semibold"
+            style={{ color: colors.text }}
+          >
+            AI Chat
+          </Text>
+          <TouchableOpacity
+            onPress={resetChat}
+            className="p-2 rounded-full"
+            style={{ backgroundColor: colors.onSurface }}
+          >
+            <RotateCcw size={20} color={colors.tabIconDefault} />
+          </TouchableOpacity>
+        </View>
+      )}
+
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : "height"}

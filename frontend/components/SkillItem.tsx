@@ -16,6 +16,7 @@ type SkillItemProps = {
   completeConfetti: () => void;
   removeSkill: (id: string) => void;
   preview?: boolean;
+  notClickable?: boolean;
 } & Todo;
 
 const SkillItem = (data: SkillItemProps) => {
@@ -75,6 +76,7 @@ const SkillItem = (data: SkillItemProps) => {
       className="p-8 rounded-3xl gap-5 relative"
       style={{ backgroundColor: data.color }}
       onPress={() => {
+        if (data.notClickable) return;
         router.push(`/${data.id}`);
       }}
     >

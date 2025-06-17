@@ -104,7 +104,13 @@ def collect_information(input) -> Dict:
   try:
     # Parse the response using the new structured format
     response = collector_parser.parse(llm_res.content)
-    return response.model_dump()
+    result = response.model_dump()
+    
+    # Override status based on missing_fields - if empty, status should be complete
+    if not result.get('missing_fields') or len(result.get('missing_fields', [])) == 0:
+      result['status'] = 'complete'
+    
+    return result
   except Exception as e:
     print(f"Error parsing response: {e}")
     print(f"LLM response: {llm_res.content}")

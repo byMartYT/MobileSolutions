@@ -14,7 +14,20 @@ type IconBoxProps = {
 const IconBox = ({ icon, color, small = false }: IconBoxProps) => {
   const { theme } = useAppTheme();
 
-  const IconComponent = (LucideIcons as any)[icon];
+  // Convert icon name to PascalCase (e.g., "laptop" -> "Laptop")
+  const convertToPascalCase = (str: string) => {
+    return str
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join("");
+  };
+
+  const iconName = convertToPascalCase(icon);
+  const IconComponent = (LucideIcons as any)[iconName];
+
+  // Fallback to a default icon if the icon is not found
+  const FinalIconComponent = IconComponent || (LucideIcons as any).Star;
+
   return (
     <View
       className={clsx(
@@ -27,7 +40,7 @@ const IconBox = ({ icon, color, small = false }: IconBoxProps) => {
         borderWidth: 5,
       }}
     >
-      <IconComponent
+      <FinalIconComponent
         color={`hsl(${extractHueFromHsl(color)}, 88%, 26%)`}
         size={!small ? 28 : 22}
         strokeWidth={2}
