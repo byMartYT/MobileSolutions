@@ -5,9 +5,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 import React, { useLayoutEffect, useState, useEffect } from "react";
 import { useLocalSearchParams, useNavigation, router } from "expo-router";
+import { Trash2 } from "lucide-react-native";
 import { api } from "@/api/api";
 import { Todo } from "@/generated/api";
 import Container from "@/components/Container";
@@ -18,11 +20,15 @@ import SkillPreview from "@/components/SkillPreview";
 import StepsManager from "@/components/StepsManager";
 import Button from "@/components/Button";
 import useStore from "@/store/store";
+import { useAppTheme } from "@/hooks/useAppTheme";
+import Colors from "@/constants/Colors";
 
 const EditSkill = () => {
   const { skillId } = useLocalSearchParams();
   const navigation = useNavigation();
-  const { updateSkill } = useStore();
+  const { updateSkill, removeSkill } = useStore();
+  const { colorScheme } = useAppTheme();
+  const colors = Colors[colorScheme];
 
   // Original skill data
   const [skill, setSkill] = useState<Todo | null>(null);
@@ -40,13 +46,56 @@ const EditSkill = () => {
   // UI state
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleDeleteSkill = () => {
+    Alert.alert(
+      "Skill löschen",
+      "Möchten Sie diesen Skill wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+      [
+        {
+          text: "Abbrechen",
+          style: "cancel",
+        },
+        {
+          text: "Löschen",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              if (skill?.id) {
+                // Delete from backend
+                await api.deleteTodoApiV1TodosTodoIdDelete(skill.id);
+                // Remove from local store
+                removeSkill(skill.id);
+                // Navigate back
+                router.back();
+              }
+            } catch (error) {
+              console.error("Error deleting skill:", error);
+              Alert.alert("Fehler", "Skill konnte nicht gelöscht werden.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: "Edit Skill",
-      headerBackTitle: "Back",
+      headerTitle: "Skill bearbeiten",
+      headerBackTitle: "Zurück",
       headerTitleStyle: { fontWeight: "bold" },
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={handleDeleteSkill}
+          style={{
+            padding: 8,
+            marginRight: 8,
+          }}
+        >
+          <Trash2 size={22} color="#FF3B30" />
+        </TouchableOpacity>
+      ),
     });
-  });
+  }, [skill, colors]);
 
   // Load skill data and populate form
   useEffect(() => {
