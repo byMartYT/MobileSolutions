@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from "react-native";
-import React, { useOptimistic, useState } from "react";
+import React, { useOptimistic, useState, useEffect } from "react";
 import { TodoItem } from "@/generated";
 import { Check } from "lucide-react-native";
 import clsx from "clsx";
@@ -12,6 +12,11 @@ type Props = {
 
 const NextTodo = ({ todo, onStatusChange, onWhite = false }: Props) => {
   const [status, setStatus] = useState(todo.status);
+
+  // Sync local status when todo prop changes
+  useEffect(() => {
+    setStatus(todo.status);
+  }, [todo.status, todo.id]);
 
   const handlePress = async () => {
     const newStatus = !status;

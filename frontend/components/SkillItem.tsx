@@ -26,6 +26,11 @@ const SkillItem = (data: SkillItemProps) => {
     data.todos.filter((todo) => !todo.status)
   );
 
+  // Update nextTodo when data.todos changes (sync with other screens)
+  useEffect(() => {
+    setNextTodo(data.todos.filter((todo) => !todo.status));
+  }, [data.todos]);
+
   const count = data.todos.filter((item) => item.status).length;
   const total = data.todos.length;
 
@@ -42,12 +47,17 @@ const SkillItem = (data: SkillItemProps) => {
       ...nextTodo[0],
       status: newStatus,
     };
+    const updatedTodos = data.todos.map((todo) =>
+      todo.id === nextTodo[0].id ? updatedTodo : todo
+    );
+
     updateSkill({
       ...data,
-      todos: data.todos.map((todo) =>
-        todo.id === nextTodo[0].id ? updatedTodo : todo
-      ),
+      todos: updatedTodos,
     });
+
+    // Update local nextTodo state immediately
+    setNextTodo(updatedTodos.filter((todo) => !todo.status));
 
     // Gamification Integration
     if (newStatus && data.id) {
