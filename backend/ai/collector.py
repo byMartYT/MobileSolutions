@@ -1,4 +1,4 @@
-from langchain_openai import AzureChatOpenAI
+from langchain.chat_models import init_chat_model
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
@@ -75,12 +75,7 @@ class CollectorRequest(BaseModel):
 
 collector_parser = PydanticOutputParser(pydantic_object=CollectorResponse)
 
-llm = AzureChatOpenAI(
-  api_key=os.environ.get("AZURE_OPENAI_API_KEY"),
-  azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
-  azure_deployment=os.environ.get("AZURE_OPENAI_DEPLOYMENT"),
-  api_version=os.environ.get("AZURE_OPENAI_API_VERSION"),
-  )
+llm = init_chat_model(model="gpt-4.1", api_key=os.environ.get("OPENAI_API_KEY"))
 
 def collect_information(input) -> Dict:
   collector_prompt = PromptTemplate(
